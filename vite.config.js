@@ -25,6 +25,7 @@ function jsInSrcAsJsx() {
 }
 
 export default defineConfig(() => ({
+  base: "./",
   server: {
     host: "::",
     port: 8080,
