@@ -1,0 +1,482 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* PS2 Old font for startup prompt */
+@font-face {
+  font-family: 'PsOld';
+  src: url('/fonts/PsOld-vmPMD.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Zrnic';
+  src: url('/fonts/zrnic rg.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* PS2-Inspired Design System */
+
+@layer base {
+  :root {
+    /* PS2 Dark Theme - Always dark */
+    --background: 220 20% 2%;
+    --foreground: 210 100% 95%;
+
+    --card: 220 30% 6%;
+    --card-foreground: 210 100% 95%;
+
+    --popover: 220 30% 8%;
+    --popover-foreground: 210 100% 95%;
+
+    /* PS2 Iconic Blue */
+    --primary: 217 91% 60%;
+    --primary-foreground: 220 20% 2%;
+
+    --secondary: 220 40% 15%;
+    --secondary-foreground: 210 100% 90%;
+
+    --muted: 220 30% 12%;
+    --muted-foreground: 215 30% 55%;
+
+    --accent: 217 91% 50%;
+    --accent-foreground: 210 100% 98%;
+
+    /* PS2 Symbol Colors */
+    --ps2-triangle: 145 70% 50%;
+    --ps2-circle: 0 80% 55%;
+    --ps2-cross: 217 91% 60%;
+    --ps2-square: 300 70% 60%;
+
+    /* Status Colors */
+    --success: 145 70% 45%;
+    --success-foreground: 145 70% 95%;
+    --destructive: 0 80% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 40% 18%;
+    --input: 220 30% 12%;
+    --ring: 217 91% 60%;
+
+    --radius: 0.5rem;
+
+    /* Gradients */
+    --gradient-ps2: linear-gradient(135deg, hsl(217 91% 25%) 0%, hsl(220 80% 8%) 100%);
+    --gradient-glow: linear-gradient(180deg, hsl(217 91% 60% / 0.3) 0%, transparent 100%);
+    --gradient-card: linear-gradient(145deg, hsl(220 30% 10%) 0%, hsl(220 30% 5%) 100%);
+    
+    /* Shadows */
+    --shadow-glow: 0 0 30px hsl(217 91% 60% / 0.3);
+    --shadow-card: 0 4px 30px hsl(220 80% 5% / 0.8);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Rajdhani', sans-serif;
+  }
+
+.psold-font {
+  font-family: 'PsOld', 'Rajdhani', sans-serif;
+}
+
+.zrnic-font {
+  font-family: 'Zrnic', 'Rajdhani', sans-serif;
+}
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Orbitron', sans-serif;
+  }
+}
+
+@layer components {
+  /* PS2 Card Styling */
+  .ps2-card {
+    @apply relative overflow-hidden rounded-lg border border-border;
+    background: linear-gradient(145deg, hsla(220, 29%, 10%, 0.826) 0%, hsla(225, 31%, 5%, 0.914) 100%);
+    backdrop-filter: blur(0px);
+    box-shadow: var(--shadow-card);
+  }
+
+  .ps2-card::before {
+    content: '';
+    @apply absolute inset-0 pointer-events-none;
+    background: linear-gradient(135deg, hsl(217 91% 60% / 0.05) 0%, transparent 50%);
+  }
+
+  /* PS2 Glow Effect */
+  .ps2-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .ps2-glow-text {
+    text-shadow: 0 0 20px hsl(217 91% 60% / 0.5);
+  }
+
+  .ps2-heading {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+  }
+
+  .death-mode .ps2-glow-text {
+    text-shadow: 0 0 20px rgba(255, 20, 20, 0.7), 0 0 45px rgba(255, 0, 0, 0.5);
+  }
+
+  /* PS2 Button */
+  .ps2-button {
+    @apply relative px-6 py-3 font-semibold uppercase tracking-wider rounded;
+    @apply bg-primary text-primary-foreground;
+    @apply transition-all duration-300 ease-out;
+    font-family: 'Orbitron', sans-serif;
+    box-shadow: 0 0 20px hsl(217 91% 60% / 0.3);
+  }
+
+  .ps2-button-death {
+    background: linear-gradient(135deg, #7f0000, #ff003c);
+    border-color: rgba(255, 51, 51, 0.8);
+    box-shadow: 0 0 35px rgba(255, 0, 0, 0.4);
+  }
+
+  .ps2-button:hover {
+    @apply scale-105;
+    box-shadow: 0 0 40px hsl(217 91% 60% / 0.5);
+  }
+
+  .ps2-button.ps2-button-death:hover {
+    box-shadow: 0 0 55px rgba(255, 0, 0, 0.7);
+  }
+
+  .ps2-button:active {
+    @apply scale-95;
+  }
+
+  /* PS2 Input */
+  .ps2-input {
+    @apply w-full px-4 py-3 rounded bg-input border border-border;
+    @apply text-foreground placeholder:text-muted-foreground;
+    @apply focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30;
+    @apply transition-all duration-200;
+    font-family: 'Zrnic', 'Rajdhani', sans-serif;
+    font-size: 1.1rem;
+  }
+
+  .ps2-input-death {
+    border-color: rgba(255, 80, 80, 0.9);
+    background-color: rgba(25, 0, 0, 0.85);
+    color: #ffeaea;
+    box-shadow: 0 0 25px rgba(255, 0, 0, 0.25);
+  }
+
+  .ps2-input-death::placeholder {
+    color: rgba(255, 200, 200, 0.65);
+  }
+
+  .ps2-input-death:focus {
+    border-color: rgba(255, 120, 120, 0.95);
+    box-shadow: 0 0 30px rgba(255, 40, 40, 0.35);
+    outline: none;
+  }
+
+  /* Progress Bar */
+  .ps2-progress {
+    @apply relative h-2 rounded-full overflow-hidden;
+    background: hsl(220 30% 12%);
+  }
+
+  .ps2-progress-bar {
+    @apply h-full rounded-full transition-all duration-500;
+    background: linear-gradient(90deg, hsl(217 91% 50%), hsl(217 91% 70%));
+    box-shadow: 0 0 10px hsl(217 91% 60% / 0.5);
+  }
+
+  /* Status Tags */
+  .ps2-tag-pass {
+    @apply px-3 py-1 rounded text-sm font-semibold uppercase;
+    background: hsl(145 70% 45% / 0.2);
+    color: hsl(145 70% 60%);
+    border: 1px solid hsl(145 70% 45% / 0.3);
+  }
+
+  .ps2-tag-fail {
+    @apply px-3 py-1 rounded text-sm font-semibold uppercase;
+    background: hsl(0 80% 50% / 0.2);
+    color: hsl(0 80% 65%);
+    border: 1px solid hsl(0 80% 50% / 0.3);
+  }
+}
+
+@layer utilities {
+  /* Fog Animation */
+  @keyframes fog-drift {
+    0%, 100% {
+      transform: translateX(0) translateY(0);
+      opacity: 0.3;
+    }
+    25% {
+      transform: translateX(30px) translateY(-20px);
+      opacity: 0.5;
+    }
+    50% {
+      transform: translateX(-20px) translateY(30px);
+      opacity: 0.3;
+    }
+    75% {
+      transform: translateX(20px) translateY(10px);
+      opacity: 0.4;
+    }
+  }
+
+  @keyframes fog-drift-slow {
+    0%, 100% {
+      transform: translateX(0) scale(1);
+      opacity: 0.2;
+    }
+    50% {
+      transform: translateX(-40px) scale(1.1);
+      opacity: 0.4;
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      opacity: 0.5;
+      box-shadow: 0 0 20px hsl(217 91% 60% / 0.3);
+    }
+    50% {
+      opacity: 1;
+      box-shadow: 0 0 40px hsl(217 91% 60% / 0.6);
+    }
+  }
+
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-in-scale {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes boot-flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+  }
+
+  .animate-fog-drift {
+    animation: fog-drift 20s ease-in-out infinite;
+  }
+
+  .animate-fog-drift-slow {
+    animation: fog-drift-slow 30s ease-in-out infinite;
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .animate-spin-slow {
+    animation: spin-slow 20s linear infinite;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out forwards;
+  }
+
+  .animate-fade-in-scale {
+    animation: fade-in-scale 0.4s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.6s ease-out forwards;
+  }
+
+  .animate-boot-flicker {
+    animation: boot-flicker 0.1s ease-in-out 3;
+  }
+
+  /* Stagger animations */
+  .stagger-1 { animation-delay: 0.1s; }
+  .stagger-2 { animation-delay: 0.2s; }
+  .stagger-3 { animation-delay: 0.3s; }
+  .stagger-4 { animation-delay: 0.4s; }
+  .stagger-5 { animation-delay: 0.5s; }
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+/* PS2 Death sequence visuals */
+.death-overlay {
+  background: radial-gradient(circle, rgba(255,0,0,0.25) 0%, rgba(0,0,0,0.95) 70%);
+  mix-blend-mode: screen;
+}
+
+.death-video {
+  @apply absolute inset-0 w-full h-full object-cover opacity-40;
+  mix-blend-mode: screen;
+  filter: blur(0px);
+}
+
+.ps2-wallpaper {
+  background-image: url('/ps2_assets/ps2_default_bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.success-transition-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(0,0,0,0.9) 0%, rgba(0,0,0,1) 75%);
+  animation: success-flash 0.7s ease-out forwards;
+}
+
+.success-transition-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(0, 102, 255, 0.35), transparent 70%);
+  mix-blend-mode: screen;
+}
+
+@keyframes success-flash {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  60% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.route-transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  background: #000;
+  opacity: 0;
+}
+
+.route-transition-overlay--cover {
+  opacity: 1;
+}
+
+.route-transition-overlay--opening {
+  animation: route-fade-from-black 0.6s ease-in-out forwards;
+}
+
+.route-transition-overlay--closing {
+  animation: route-fade-to-black 0.35s ease-out forwards;
+}
+
+@keyframes route-fade-to-black {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes route-fade-from-black {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.dashboard-video-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.dashboard-menu-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  filter: blur(2px);
+  mix-blend-mode: screen;
+}
+
+.ps2-shell-content {
+  position: relative;
+  z-index: 10;
+  min-height: 100vh;
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+
+.ps2-shell-content.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ps2-shell-content.fade-in {
+  opacity: 1;
+}
