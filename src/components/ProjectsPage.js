@@ -8,6 +8,25 @@ import ProjectCard from "./ProjectCard.js";
 import LoadingScreen from "./LoadingScreen.js";
 import { playHoverSound, playClickSound } from "../lib/sound";
 
+const dedupePassedProjects = (projects = []) => {
+  const seenPassed = new Set();
+
+  return projects.filter((project) => {
+    const name = project.object?.name;
+
+    if (!name || project.grade < 1) {
+      return true;
+    }
+
+    if (seenPassed.has(name)) {
+      return false;
+    }
+
+    seenPassed.add(name);
+    return true;
+  });
+};
+
 const ProjectsPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -43,7 +62,7 @@ const ProjectsPage = () => {
       });
       setXpMap(xpMapping);
 
-      setProjects(projectsData.result || []);
+      setProjects(dedupePassedProjects(projectsData.result));
     } catch (error) {
       console.error("Failed to fetch data:", error);
     } finally {
@@ -208,7 +227,7 @@ const ProjectsPage = () => {
             {filteredProjects.length > 0 ? (
               filteredProjects.map((project, index) => (
                 <ProjectCard
-                  key={index}
+                  key={`${project.object?.name || "unknown"}-${project.createdAt}-${index}`}
                   name={project.object?.name}
                   grade={project.grade}
                   xp={xpMap[project.object?.name] || 0}

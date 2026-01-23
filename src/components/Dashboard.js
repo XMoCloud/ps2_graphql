@@ -137,7 +137,7 @@ const Dashboard = () => {
                 <p className="zrnic-font text-xs uppercase tracking-[0.4em] text-muted-foreground">User Profile</p>
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-3 flex-wrap">
-                    <p className="psold-font text-2xl text-primary ps2-glow-text tracking-[0.3em] uppercase">{user?.login}</p>
+                    <p className="psold-font text-2xl text-primary ps2-glow-text tracking-[0.3em] uppercase profile-username">{user?.login}</p>
                     <div className="flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-full px-3 py-1 ml-3">
                       <span className="zrnic-font text-[11px] uppercase tracking-[0.3em] text-muted-foreground">Level</span>
                       <span className="font-orbitron text-2xl text-primary">{userLevel ?? "—"}</span>

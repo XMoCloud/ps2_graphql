@@ -388,6 +388,21 @@
   background-repeat: no-repeat;
 }
 
+.profile-username {
+  max-width: 100%;
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 640px) {
+  .profile-username {
+    font-size: 1.25rem;
+    letter-spacing: 0.2em;
+  }
+}
+
 .success-transition-overlay {
   position: absolute;
   inset: 0;
