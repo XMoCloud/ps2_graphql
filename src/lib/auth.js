@@ -13,7 +13,9 @@ export async function signIn(identifier, password) {
   if (!response.ok) {
     const text = await response.text().catch(() => null);
     const message = text || 'Invalid credentials';
-    throw new Error(message);
+    const error = new Error(message);
+    error.status = response.status;
+    throw error;
   }
 
   return await response.json();

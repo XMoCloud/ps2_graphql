@@ -1,0 +1,143 @@
+/* Quiet PS2 panels: no displacement maps, backdrop blur, or animated sheen. */
+.asset-world { position:absolute;inset:0;background:#02040c url('/ps2_assets/ps2_default_bg.png') center/cover no-repeat; }
+.asset-world video { width:100%;height:100%;object-fit:cover;display:block; }
+.console-world:has(.asset-world)::after { background:#02061026; }
+.console-world.world-error:has(.asset-world)::after { background:#13000322; }
+html[data-experience-phase="boot"] .asset-world { background:#000; }
+html[data-experience-phase="boot"] .asset-world video { object-fit:contain; }
+.startup-canvas { filter:none; }
+.console-app,.login-page { font-family:Rajdhani,Arial,sans-serif; }
+.console-app :is(h1,h2,h3,.console-nav-item>span),.login-page .login-form-area>h1 {
+  font-family:Zrnic,Rajdhani,sans-serif;
+}
+.console-app :is(.console-panel,.player-card,.insight-card,.save-tile,.memory-summary),
+.login-page .login-form-area {
+  background:#050d1cda;border:1px solid #698fc52e;border-radius:5px;
+  box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;
+}
+.console-app .insight-card.primary { background:#09162bde; }
+.console-app .player-card::before { display:none; }
+.console-app .console-sidebar { background:transparent;border-radius:0;box-shadow:none; }
+.console-app .console-nav-item { border-radius:0;background:transparent; }
+.console-app .console-nav-item.selected { color:#8bbaff;text-shadow:none; }
+.console-app .console-nav-item.selected::after { background:#689bff;box-shadow:none; }
+.console-app .player-avatar { border-radius:3px;background:#152541;box-shadow:none; }
+.console-app .page-title h1 { font-size:36px;text-shadow:none; }
+.console-app .player-identity h2 { font-family:Zrnic,Rajdhani,sans-serif; }
+.console-app .player-level strong,.console-app .insight-card strong { color:#dce9ff;text-shadow:none; }
+.console-app .segmented { border-radius:4px;box-shadow:none; }
+.console-app .segmented button { border-radius:2px; }
+.console-app .segmented button.active { background:#1a2d49;box-shadow:none; }
+.console-app .save-tile:hover { background:#10213be8;border-color:#648ac777; }
+.console-app .project-dialog.console-surface { position:fixed;background:#071222;border:1px solid #648ac777;border-radius:6px;max-width:min(620px,calc(100vw - 36px));padding:32px; }
+.console-app .project-dialog::backdrop { background:#01040bbd;backdrop-filter:none; }
+.console-app .world-caption button { background:#071222;border-radius:3px;backdrop-filter:none; }
+.login-page .login-input-wrap { background:#091326;border-color:#5573a04d;box-shadow:none;border-radius:3px; }
+.login-page .login-input-wrap:focus-within { border-color:#659fff;box-shadow:0 0 0 1px #659fff; }
+.login-page .connect-button { background:#285ba5;border:1px solid #618fce;border-radius:3px;box-shadow:none; }
+.login-page .connect-button:hover { background:#316bbd;text-shadow:none; }
+.console-app .console-surface { position:relative; }
+.console-app .audit-hero>div { position:absolute; }
+.console-app .save-tile>.save-slot { position:absolute; }
+.console-app .project-dialog>.dialog-close { position:absolute;right:20px;top:18px;z-index:1; }
+.console-app .insight-card>.insight-icon { position:absolute; }
+
+/* Console interface revision: one material hierarchy, crisp selection feedback. */
+:root { --console-ice:#c9dfff;--console-accent:#78a9ff;--console-muted:#95aac9;--console-line:#91b6ef28; }
+.console-app .console-header { height:84px;background:linear-gradient(#0309178c,#03091700);border:0; }
+.console-app .system-brand .psold-font { font-size:36px; }
+.console-app .system-brand .brand-name { font-size:12px;letter-spacing:.12em; }
+.console-app .header-right { gap:24px; }
+.console-app .console-sidebar { border-bottom:1px solid var(--console-line); }
+.console-app .console-sidebar nav { gap:0; }
+.console-app .console-nav-item { height:62px;flex:1;justify-content:center;transition:color .12s;transform:none; }
+.console-app .console-nav-item>span:nth-last-child(2) { font:22px Zrnic,Rajdhani,sans-serif;letter-spacing:.025em; }
+.console-app .console-nav-item.selected { color:#deecff;text-shadow:0 0 18px #89b5ff50;transform:none; }
+.console-app .console-nav-item.selected::after { left:18%;right:18%;height:2px; }
+.console-app .console-nav-item.selected svg { filter:none; }
+.console-app .console-content { padding-top:29px; }
+.console-app .page-title { margin-bottom:25px; }
+.console-app .page-title h1 { font-size:38px;letter-spacing:.02em; }
+.console-app :is(.console-panel,.player-card,.insight-card,.save-tile,.memory-summary) {
+  border-color:var(--console-line);border-radius:5px;
+  background:linear-gradient(155deg,#152b4933,transparent 60%),#050e20ad;
+  box-shadow:inset 0 1px #cbe5ff0c,0 8px 30px #01030a18;
+}
+.console-app .overview-layout { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px; }
+.console-app .overview-layout> :is(.overview-toolbar,.insight-grid,.console-panel,.overview-columns) { grid-column:1/-1; }
+.console-app .overview-layout>.player-card { grid-column:1/-1;max-width:none;padding:22px 25px 17px;background:linear-gradient(90deg,#071429d6,#08122850); }
+.console-app .player-card-top { display:none; }
+.console-app .player-identity { margin:0 0 15px;gap:17px; }
+.console-app .player-avatar { width:47px;height:56px;font:28px Zrnic,Rajdhani,sans-serif;background:#102443a0;border:1px solid #94baff40; }
+.console-app .player-identity h2 { font-size:29px; }
+.console-app .player-identity p { font-size:12px;margin-top:6px;color:#9eb7d8; }
+.console-app .player-level { border:0;min-width:74px;padding:0; }
+.console-app .player-level strong { font:38px Zrnic,Rajdhani,sans-serif; }
+.console-app .player-level small { font-size:9px;letter-spacing:.13em;color:#a7c3e5; }
+.console-app .player-bottom { padding-top:12px;color:#91a9c8;font-size:11px; }
+.console-app .overview-toolbar { margin:0;align-self:end;min-height:92px; }
+.console-app .overview-toolbar>.eyebrow { font:17px Zrnic,Rajdhani,sans-serif;letter-spacing:.03em;text-transform:none; }
+.console-app .insight-grid { gap:0;border:1px solid var(--console-line);border-radius:5px;overflow:hidden;margin:0; }
+.console-app .insight-card { border:0;border-right:1px solid var(--console-line);border-radius:0;min-height:147px;padding:20px 23px;background:#061226c9;box-shadow:none; }
+.console-app .insight-card:last-child { border-right:0; }
+.console-app .insight-card.primary { background:#0c1c36ce; }
+.console-app .insight-card>.insight-icon { display:none; }
+.console-app .insight-card>span:not(.insight-icon) { margin-top:0;font:13px Rajdhani,Arial,sans-serif;color:#b5cce9; }
+.console-app .insight-card strong { font:34px Zrnic,Rajdhani,sans-serif;letter-spacing:.01em;margin:14px 0 10px; }
+.console-app .insight-card small { font:12px Rajdhani,Arial,sans-serif;color:#a2b7d6; }
+.console-app .overview-layout>.console-panel { margin:0; }
+.console-app .panel-heading h2 { font:23px Zrnic,Rajdhani,sans-serif; }
+.console-app .panel-heading>span { font-size:9px;letter-spacing:.10em;color:#93aed1; }
+.console-app .console-panel { padding:26px; }
+.console-app .metric-strip { border-color:var(--console-line); }
+.console-app .metric strong { font:32px Zrnic,Rajdhani,sans-serif; }
+.console-app .metric>span { font-size:13px;color:#a9bfdd; }
+.console-app .metric small { font-size:12px; }
+.console-app .memory-summary { padding:23px; }
+.console-app .save-tile { padding:24px;transition:border-color .12s,background .12s; }
+.console-app .save-tile>strong { font:24px Zrnic,Rajdhani,sans-serif; }
+.console-app .save-tile:hover { transform:none;background:#0e2543b8;border-color:#9ac4ff70; }
+.console-app .audit-hero { background:#071427e8;border-radius:50%;border-color:#93bfff30;box-shadow:none; }
+.console-app .metric-strip { background:#061226dc;border:1px solid var(--console-line);border-radius:5px;padding:21px 24px;gap:22px; }
+.console-app .metric-strip>.metric+.metric { border-left:1px solid var(--console-line);padding-left:24px; }
+.console-app .save-grid { margin-bottom:26px; }
+.console-app .audit-hero strong { font-family:Zrnic,Rajdhani,sans-serif; }
+.console-app .target-calculator>div strong { font-family:Zrnic,Rajdhani,sans-serif; }
+.console-app .world-caption button { background:#061327b8;border-color:#9ac4ff40;padding:9px 14px;font-size:13px; }
+.console-app :is(button,a,input,select):focus-visible,.login-page :is(button,a,input):focus-visible { outline:2px solid #9bccff;outline-offset:4px; }
+.login-page .login-layout { width:min(980px,calc(100% - 72px));grid-template-columns:1fr 390px;gap:90px; }
+.login-page .login-wordmark { font-size:clamp(85px,9vw,126px); }
+.login-page .login-product { font:20px Zrnic,Rajdhani,sans-serif;letter-spacing:.12em; }
+.login-page .login-form-area { background:linear-gradient(140deg,#15294938,transparent 55%),#030c1bc7;padding:35px 30px;border:1px solid #9ac4ff35;border-radius:5px;box-shadow:inset 0 1px #c4dfff1a,0 15px 60px #01030a40; }
+.login-page .login-form-area>h1 { font-size:36px;margin-bottom:29px; }
+.login-page .login-field label { font:14px Rajdhani,Arial,sans-serif;color:#bed3ee; }
+.login-page .login-input-wrap { height:55px;min-height:55px;background:#0714289e;border-color:#8ab5ef38; }
+.login-page .login-input-wrap input { font:15px Rajdhani,Arial,sans-serif;color:#e0edff; }
+.login-page .connect-button { font:21px Zrnic,Rajdhani,sans-serif;letter-spacing:.05em;background:linear-gradient(#24589b,#173b70);border-color:#85b7fa65;height:52px; }
+.login-page .connect-button:hover { background:linear-gradient(#2f6db9,#21518f); }
+.login-page .preview-link { font:14px Rajdhani,Arial,sans-serif;color:#a7c6ed; }
+@media(max-width:980px) {
+  .login-page .login-layout { gap:35px;grid-template-columns:1fr 350px; }
+  .console-app .console-nav-item { flex:none;min-width:125px; }
+  .console-app .insight-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .console-app .insight-card:nth-child(2) { border-right:0; }
+  .console-app .insight-card:nth-child(-n+2) { border-bottom:1px solid var(--console-line); }
+}
+@media(max-width:680px) {
+  .login-page .login-layout { display:flex;width:min(390px,calc(100% - 38px));gap:30px; }
+  .console-app .overview-layout { gap:17px; }
+  .console-app .overview-toolbar { min-height:65px; }
+  .console-app .insight-card { padding:18px 16px;min-height:150px; }
+  .console-app .insight-card strong { font-size:30px; }
+  .console-app .player-identity h2 { font-size:23px; }
+  .console-app .player-bottom>span:last-child { font-size:8px; }
+  .console-app .console-panel { padding:21px; }
+  .console-app .header-right { gap:12px; }
+  .console-app .metric-strip { display:grid;grid-template-columns:minmax(0,1fr);padding:20px;gap:14px; }
+  .console-app .metric-strip>.metric { display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 12px; }
+  .console-app .metric-strip>.metric+.metric { border-left:0;border-top:1px solid var(--console-line);padding:14px 0 0; }
+  .console-app .metric-strip .metric strong { font-size:26px;margin:0; }
+  .console-app .metric-strip .metric small { grid-column:1/-1; }
+  .console-app .metric-strip .metric small:empty { display:none; }
+  .console-app .panel-heading { flex-wrap:wrap;align-items:flex-start; }
+}

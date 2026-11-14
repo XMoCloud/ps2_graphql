@@ -3,6 +3,12 @@ import { createRoot } from "react-dom/client";
 
 import App from "./App.js";
 import "./index.css";
+import "./experience/console-blue.css";
+import "./experience/console-clean.css";
+import "./experience/console-menu.css";
+import "./console/status.css";
+import "./console/memory-browser.css";
+import "./console/menu-finish.css";
 import { preloadStaticAssets } from "./lib/preloadAssets.js";
 
 preloadStaticAssets();

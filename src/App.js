@@ -1,23 +1,80 @@
-import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-
-import Login from "./components/Login.js";
-import Dashboard from "./components/Dashboard.js";
-import ProjectsPage from "./components/ProjectsPage.js";
-import NotFound from "./components/404.js";
-import PS2Shell from "./components/PS2Shell.js";
-
-const App = () => (
-  <BrowserRouter>
-    <Routes>
-      <Route path="/" element={<Login />} />
-      <Route element={<PS2Shell />}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/projects" element={<ProjectsPage />} />
-      </Route>
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-  </BrowserRouter>
-);
-
-export default App;
+import React, { lazy, Suspense } from "react";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
+import Experience from "./experience/Experience";
+import Login from "./components/Login";
+import Startup from "./components/Startup";
+const ConsoleApp = lazy(() => import("./console/ConsoleApp"));
+import NotFound from "./components/404";
+import ConsoleWorld from "./components/ConsoleWorld";
+const StartupStudy = import.meta.env.DEV ? lazy(() => import("./components/StartupStudy")) : null;
+function Viewport() {
+  const location = useLocation();
+  if (import.meta.env.DEV && location.pathname === "/preview/startup")
+    return (
+      <Suspense
+        fallback={
+          <p className="startup-study-loading">Preparing startup comparison…</p>
+        }
+      >
+        <StartupStudy />
+      </Suspense>
+    );
+  return (
+    <>
+      <ConsoleWorld />
+      <Suspense
+        fallback={
+          <div className="loading-console" role="status">
+            Reading your memory cards…
+          </div>
+        }
+      >
+        <Routes>
+          <Route path="/" element={<Login />} />
+          {["dashboard", "projects", "audits", "skills"].flatMap((section) => [
+            <Route
+              key={section}
+              path={`/${section}`}
+              element={<ConsoleApp />}
+            />,
+            ...(import.meta.env.DEV ? [<Route
+              key={`preview-${section}`}
+              path={`/preview/${section}`}
+              element={<ConsoleApp />}
+            />] : []),
+          ])}
+          {["journey", "system"].flatMap((path) => [
+            <Route
+              key={path}
+              path={`/${path}`}
+              element={<Navigate to="/dashboard" replace />}
+            />,
+            ...(import.meta.env.DEV ? [<Route
+              key={`preview-${path}`}
+              path={`/preview/${path}`}
+              element={<Navigate to="/preview/dashboard" replace />}
+            />] : []),
+          ])}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
+      <Startup />
+      <div className="console-screen-lines" aria-hidden="true" />
+    </>
+  );
+}
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Experience>
+        <Viewport />
+      </Experience>
+    </BrowserRouter>
+  );
+}

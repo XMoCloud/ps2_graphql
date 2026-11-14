@@ -1,183 +1,54 @@
-import { getToken } from './auth';
+import { getToken } from "./auth";
 
-const GRAPHQL_URL = 'https://learn.reboot01.com/api/graphql-engine/v1/graphql';
+const GRAPHQL_URL = "https://learn.reboot01.com/api/graphql-engine/v1/graphql";
 
 export async function graphqlQuery(query, variables = {}) {
   const token = getToken();
-  
+
   const response = await fetch(GRAPHQL_URL, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ query, variables }),
   });
 
+  if (!response.ok)
+    throw new Error(
+      response.status === 401
+        ? "Your session expired. Please sign in again."
+        : "The service could not be reached.",
+    );
   const result = await response.json();
-  
+
   if (result.errors) {
     throw new Error(result.errors[0].message);
   }
-  
+
   return result.data;
 }
 
-export const QUERIES = {
-  USER: `
-    query {
-      user {
-        id
-        login
-        firstName
-        lastName
-        email
-        createdAt
-      }
+// Continue even if the server applies a smaller page cap than requested.
+// Stable ID ordering prevents equal timestamps from reordering pages.
+export async function graphqlPages(query, collection, request = graphqlQuery, variables = {}) {
+  const rows = [],
+    seen = new Set();
+  let first;
+  for (let page = 0; page < 200; page++) {
+    const data = await request(query, { ...variables, limit: 500, offset: rows.length });
+    if (!first) first = data;
+    const batch = data[collection];
+    if (!Array.isArray(batch)) throw new Error("Missing GraphQL collection");
+    if (!batch.length) return { ...first, [collection]: rows };
+    for (const row of batch) {
+      if (seen.has(row.id))
+        throw new Error("Records changed while loading. Refresh to retry.");
+      seen.add(row.id);
+      rows.push(row);
     }
-  `,
-
-  LEVEL: `
-    query {
-      transaction(
-        where: {
-          type: { _eq: "level" }
-          path: { _like: "%bh-module%" }
-        }
-        order_by: { amount: desc }
-        limit: 1
-      ) {
-        amount
-      }
-    }
-  `,
-  
-  AUDIT_TOTALS: `
-    query {
-      up: transaction_aggregate(
-        where: { type: { _eq: "up" } }
-      ) {
-        aggregate {
-          sum {
-            amount
-          }
-        }
-      }
-      down: transaction_aggregate(
-        where: { type: { _eq: "down" } }
-      ) {
-        aggregate {
-          sum {
-            amount
-          }
-        }
-      }
-    }
-  `,
-  
-  XP_OVERVIEW: `
-    query {
-      transaction_aggregate(
-        where: {
-          event: { path: { _eq: "/bahrain/bh-module" } }
-          type: { _eq: "xp" }
-        }
-      ) {
-        aggregate {
-          sum {
-            amount
-          }
-        }
-      }
-      result(
-        where: {
-          _and: [
-            { path: { _like: "%bh-module%" } }
-            { type: { _eq: "user_audit" } }
-            { grade: { _gte: 1.0 } }
-          ]
-        }
-        order_by: { createdAt: desc }
-      ) {
-        grade
-        object {
-          name
-        }
-      }
-    }
-  `,
-  
-  XP_PROGRESS: `
-    query {
-      transaction_aggregate(
-        where: {
-          event: { path: { _eq: "/bahrain/bh-module" } }
-          type: { _eq: "xp" }
-        }
-      ) {
-        aggregate {
-          sum {
-            amount
-          }
-        }
-      }
-      transaction(
-        where: {
-          type: { _eq: "xp" }
-          object: { type: { _eq: "project" } }
-        }
-        order_by: { createdAt: asc }
-      ) {
-        createdAt
-        amount
-        object {
-          name
-        }
-      }
-    }
-  `,
-  
-  PROJECTS: `
-    query {
-      result(
-        where: {
-          _and: [
-            { path: { _like: "%bh-module%" } }
-            { type: { _eq: "user_audit" } }
-          ]
-        }
-        order_by: { createdAt: desc }
-      ) {
-        grade
-        createdAt
-        object {
-          name
-        }
-      }
-      transaction(
-        where: {
-          type: { _eq: "xp" }
-          path: { _like: "%bh-module%" }
-        }
-      ) {
-        amount
-        object {
-          name
-        }
-      }
-    }
-  `,
-  
-  SKILLS: `
-    query {
-      transaction(
-        where: { type: { _like: "skill_%" } }
-        distinct_on: [type]
-        order_by: [{ type: asc }, { amount: desc }]
-      ) {
-        type
-        amount
-      }
-    }
-  `,
-};
+  }
+  throw new Error(
+    "History is too large to load completely. Narrow the query scope.",
+  );
+}

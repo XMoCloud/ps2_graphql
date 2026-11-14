@@ -13,7 +13,7 @@ function jsInSrcAsJsx() {
     async transform(code, id) {
       const [filepath] = id.split("?", 1);
 
-      if (!/src[\\/].*\.js$/.test(filepath)) {
+      if (!/src[\\/].*\.jsx?$/.test(filepath)) {
         return null;
       }
 
@@ -29,8 +29,9 @@ export default defineConfig(() => ({
   server: {
     host: "::",
     port: 8080,
+    watch: { usePolling: true, interval: 300 },
     hmr: {
-      overlay: false,
+      overlay: true,
     },
   },
   plugins: [jsInSrcAsJsx(), react()],
@@ -43,7 +44,7 @@ export default defineConfig(() => ({
   },
   esbuild: {
     loader: "jsx",
-    include: /src[\\/].*\.js$/,
+    include: /src[\\/].*\.jsx?$/,
   },
   resolve: {
     alias: {

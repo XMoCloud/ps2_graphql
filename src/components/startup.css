@@ -1,0 +1,67 @@
+.playcanvas-startup {
+  background: #000;
+  isolation: isolate;
+}
+.startup-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: #000;
+  filter: blur(0.4px);
+}
+.playcanvas-startup .boot-prompt {
+  z-index: 2;
+  background: radial-gradient(ellipse at center, #081326, #000 75%);
+}
+.playcanvas-startup.boot-boot::before {
+  display: none;
+}
+.playcanvas-startup .boot-wordmark {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  animation: pc-startup-title 4.533333s linear both;
+  pointer-events: none;
+}
+.playcanvas-startup .startup-credit,
+.study-credit > span {
+  display: block;
+  font:
+    700 3vw Arial,
+    sans-serif;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  white-space: nowrap;
+  transform: scaleX(1.48);
+  color: #fff;
+  text-shadow: 0 1px 2px #000;
+}
+.playcanvas-startup .boot-skip {
+  z-index: 3;
+}
+.startup-error {
+  font:
+    12px system-ui,
+    sans-serif;
+  max-width: 330px;
+  text-align: center;
+  color: #c7d7f2;
+  margin-top: 16px;
+}
+@keyframes pc-startup-title {
+  0%,
+  23.38% {
+    opacity: 0;
+  }
+  36.4%,
+  59.55% {
+    opacity: 1;
+  }
+  69.04%,
+  100% {
+    opacity: 0;
+  }
+}

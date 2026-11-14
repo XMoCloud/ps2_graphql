@@ -1,0 +1,159 @@
+/* Eight-direction black glyph outlines, measured from the PS2 reference menu.
+   Keep small captions plain so their counters stay clear at normal zoom. */
+:root {
+  --menu-outline: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000,
+    2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000;
+  --menu-outline-small: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
+    1px 0 0 #000, -1px 0 0 #000, 0 1px 0 #000, 0 -1px 0 #000;
+  --menu-outline-large: 3px 3px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000,
+    3px 0 0 #000, -3px 0 0 #000, 0 3px 0 #000, 0 -3px 0 #000;
+}
+
+.status-console .page-title h1,
+.status-console .status-panel h2,
+.status-console .status-identity h2,
+.status-console .console-nav-item > .nav-label,
+.status-console .status-readout > strong,
+.status-console .status-level > strong,
+.status-console .console-datetime,
+.login-page .login-form-area > h1,
+.login-page .connect-button,
+.memory-library .card-choice-heading > strong {
+  font-family: var(--ps2-menu-face); font-weight: 500; text-shadow: var(--menu-outline);
+}
+.status-console .console-nav-item:is(.selected, :hover, :focus-visible) {
+  color: #dddff2;
+  text-shadow: var(--menu-outline), 0 0 14px #4630a1;
+}
+.status-console .console-sidebar nav { border-block: 0; }
+.status-panel { background: linear-gradient(125deg, #1f254f22, #17102d0c 65%), #04081399; }
+.status-console .console-options button[aria-pressed="true"],
+.status-console .chart-subnav button[aria-pressed="true"] { color: #d5d2eb; text-shadow: var(--menu-outline-small); }
+.status-console .ps2-chart-tooltip { border: 2px solid #737bada3; background: #080d21f5; }
+.status-console .recharts-text { paint-order: stroke fill; stroke: #000; stroke-width: 2px; stroke-linejoin: round; }
+.status-console .recharts-legend-item-text { color: #c8cadb !important; text-shadow: var(--menu-outline-small); }
+.console-key { color: #c8c6d6; }
+.console-key.key-arrow { color: #aa9cc7; }
+.status-console .passed { color: #c3c9e2 !important; }
+.status-console .status-panel > header p { color: #a8adc0; }
+.status-console .audit-table > [role="row"] { border-bottom: 0; }
+.login-page .login-form-area { border: 2px solid #626f97ad; border-top-color: #a0a8c299; box-shadow: inset 0 1px #d5d9ee18, 0 3px 12px #0004; }
+.login-page .login-input-wrap { border: 2px solid #4351719c; }
+.login-page .login-input-wrap:focus-within { border-color: #7962b2; box-shadow: 0 0 12px #45307755; }
+.login-page .login-input-wrap input:focus { color: #d9d7ed; }
+.login-page .connect-button { border: 2px solid #5d649a; background: linear-gradient(115deg, #142856bd, #241a47b0); color: #d9ddec; }
+.login-page .connect-button:is(:hover, :focus-visible) { background: linear-gradient(115deg, #1d3976d4, #36215cbf); }
+.login-page .login-wordmark,
+.status-console .console-header .system-brand .psold-font {
+  color: #fff;
+  text-shadow: var(--menu-outline-small), 0 0 7px #fff6, 0 0 18px #777fc34d;
+}
+.login-page .login-intro > .login-product,
+.status-console .console-header .system-brand .brand-name {
+  color: #fff;
+  text-shadow: var(--menu-outline-small), 0 1px 3px #000;
+}
+.memory-browser-dialog { --memory-text-shadow: var(--menu-outline); }
+.memory-browser-header h2, .memory-browser-header > span,
+.save-detail-info h3, .memory-loading { text-shadow: var(--menu-outline-large); }
+.memory-browser-dialog .save-browser-item > strong,
+.memory-browser-dialog .memory-footer button,
+.memory-browser-dialog .memory-detail-back { text-shadow: var(--menu-outline); }
+.memory-browser-dialog .save-browser-item.is-selected > strong,
+.memory-library .memory-card-choice:is(:hover, :focus-visible) .card-choice-heading strong { color: #e0ddec; text-shadow: var(--menu-outline), 0 0 12px #4c357b; }
+@media(max-width:680px) {
+  :root { --menu-outline: var(--menu-outline-small); --menu-outline-large: 1.5px 1.5px 0 #000, -1.5px -1.5px 0 #000, 1.5px -1.5px 0 #000, -1.5px 1.5px 0 #000; }
+  .status-console .console-sidebar nav { display: flex; width: 100%; max-width: none; gap: 8px; justify-content: space-between; }
+  .status-console .console-nav-item { flex: 1 1 0; min-width: 0; height: 48px; padding: 0; }
+  .status-console .console-nav-item > .nav-label { font-size: 16px; white-space: nowrap; }
+}
+
+/* Account shell: one aligned top bar. Login deliberately keeps its own stage. */
+:root { --menu-hover: #5caaff; --menu-selected: #e1d65d; }
+.console-topbar {
+  position: sticky; top: 0; z-index: 8; width: 100%;
+  background: rgb(5 9 17 / 32%);
+  -webkit-backdrop-filter: blur(14px) saturate(115%);
+  backdrop-filter: blur(14px) saturate(115%);
+  border-bottom: 2px solid #59668b8a; box-shadow: 0 3px 15px #0004;
+}
+.console-topbar-inner {
+  width: min(1520px, calc(100% - 56px)); margin: 0 auto;
+  display: grid; grid-template-columns: max-content max-content minmax(0, 1fr) max-content max-content;
+  align-items: center; column-gap: 28px; min-height: 94px;
+}
+.console-topbar .console-brand-link { display: block; min-width: 0; grid-column: 1; grid-row: 1; }
+.console-topbar .system-brand { display: flex; align-items: center; gap: 16px; }
+.console-topbar .system-brand > .psold-font {
+  color: #fff; font-size: 34px; line-height: 1;
+  text-shadow: var(--menu-outline-small), 0 0 7px #fff6, 0 0 18px #777fc34d;
+}
+.console-topbar .system-brand > .brand-name {
+  display: block; color: #fff; font: 12px var(--ps2-menu-face); letter-spacing: .1em;
+  text-shadow: var(--menu-outline-small);
+}
+.console-topbar .console-navigation { display: flex; justify-content: center; align-items: center; gap: 12px; width: 100%; min-width: 0; grid-column: 3; grid-row: 1; }
+.console-topbar .console-nav-item { display: flex; align-items: center; justify-content: center; flex: 0 1 108px; min-width: 0; height: 62px; padding: 0 7px; }
+.console-topbar .console-nav-item > .nav-label { font: 500 21px/1.2 var(--ps2-menu-face); letter-spacing: 0; white-space: nowrap; text-shadow: var(--menu-outline); }
+.console-topbar .console-datetime {
+  width: auto; margin: 0; padding: 0; display: block;
+  color: var(--menu-hover); font: 500 21px/1.2 var(--ps2-menu-face); letter-spacing: .025em;
+  font-variant-numeric: tabular-nums; text-shadow: var(--menu-outline); white-space: nowrap;
+}
+.console-topbar .console-date { grid-column: 2; grid-row: 1; justify-self: start; }
+.console-topbar .console-time { grid-column: 4; grid-row: 1; justify-self: end; }
+.console-account-actions { display: flex; align-items: center; justify-content: flex-end; gap: 18px; min-width: 0; grid-column: 5; grid-row: 1; }
+.console-account-actions .account-label { color: #b7c6e6; font: 16px var(--ps2-menu-face); max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.console-account-actions .exit-control { font: 16px var(--ps2-menu-face); white-space: nowrap; }
+.console-account-actions .exit-control { padding: 7px 10px; border: 1px solid #59658b88; color: #c5cadd; }
+
+/* Restore PS2 selection feedback across the account, login and save browser. */
+.status-console :is(a, button):is(:hover, :focus-visible),
+.login-page :is(button, a):is(:hover, :focus-visible),
+.memory-browser-dialog :is(button, summary):is(:hover, :focus-visible) { color: var(--menu-hover); }
+.status-console .console-nav-item:is(:hover, :focus-visible) { color: var(--menu-hover); text-shadow: var(--menu-outline), 0 0 10px #367be666; }
+.status-console .console-nav-item:is(.selected, [aria-current="page"]) { color: var(--menu-selected); text-shadow: var(--menu-outline), 0 0 10px #81701655; }
+.status-console .page-title h1 { color: var(--menu-selected); }
+.status-console :is(.console-options, .chart-subnav) button[aria-pressed="true"] { color: var(--menu-selected); border-bottom-color: var(--menu-selected); }
+.status-console :is(.console-options, .chart-subnav) button:not([aria-pressed="true"]):is(:hover, :focus-visible) { color: var(--menu-hover); }
+.status-console :is(.recent-saves a, .piscine-summary-list a):is(:hover, :focus-visible) strong { color: var(--menu-hover); }
+.status-console .memory-card-choice:is(:hover, :focus-visible) .card-choice-heading strong { color: var(--menu-selected); }
+.memory-browser-dialog .save-browser-item.is-selected > strong,
+.memory-browser-dialog .memory-browser-header > span,
+.memory-browser-dialog .save-detail-info h3,
+.memory-browser-dialog .save-team-heading { color: var(--menu-selected); }
+.memory-browser-dialog :is(.memory-footer button, .memory-detail-back):is(:hover, :focus-visible) { color: var(--menu-hover); }
+.login-page .login-input-wrap input:focus { color: var(--menu-hover); }
+.login-page .login-input-wrap:focus-within { border-color: var(--menu-hover); }
+.login-page .connect-button:is(:hover, :focus-visible) { color: var(--menu-hover); }
+.status-console .ps2-text-link:is(:hover, :focus-visible) { color: var(--menu-hover); }
+
+@media(max-width:1340px) {
+  .console-topbar-inner { grid-template-columns: max-content minmax(0, 1fr) minmax(0, 1fr) max-content; column-gap: 20px; row-gap: 4px; padding-top: 12px; }
+  .console-topbar .system-brand { gap: 10px; }
+  .console-topbar .console-navigation { grid-row: 2; grid-column: 1/-1; gap: 12px; }
+  .console-topbar .console-nav-item { flex: 1 1 0; height: 48px; }
+  .console-topbar .console-time { grid-column: 3; }
+  .console-account-actions { grid-column: 4; gap: 12px; }
+}
+@media(max-width:680px) {
+  .console-topbar-inner { width: calc(100% - 24px); grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 12px; row-gap: 14px; padding-top: 14px; }
+  .console-topbar .system-brand { gap: 9px; }
+  .console-topbar .system-brand > .psold-font { font-size: 24px; }
+  .console-topbar .system-brand > .brand-name { font-size: 11px; letter-spacing: .06em; }
+  .console-topbar .console-datetime { font-size: 18px; }
+  .console-topbar .console-date { grid-column: 1; grid-row: 2; }
+  .console-topbar .console-time { grid-column: 2; grid-row: 2; }
+  .console-account-actions { grid-column: 2; grid-row: 1; gap: 9px; }
+  .console-account-actions .account-label { max-width: 66px; font-size: 12px; }
+  .console-account-actions .exit-control { font-size: 12px; padding: 5px; }
+  .console-topbar .console-nav-item > .nav-label { font-size: 17px; }
+  .console-topbar .console-navigation { grid-row: 3; gap: 8px; }
+}
+@media(max-width:360px) {
+  .console-topbar .system-brand { gap: 6px; }
+  .console-topbar .system-brand > .psold-font { font-size: 20px; }
+  .console-topbar .system-brand > .brand-name { font-size: 9px; }
+  .console-account-actions .account-label { max-width: 48px; font-size: 11px; }
+  .console-account-actions .exit-control { font-size: 11px; padding: 4px; }
+}

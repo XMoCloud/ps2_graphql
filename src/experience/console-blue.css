@@ -1,0 +1,186 @@
+/* PS2 console glass: silver typography, cyan focus, transparent navy surfaces. */
+:root { --ink:#edf3ff; --muted:#acbbd0; --line:#c6dcff2b; --panel:#08142685; }
+body { background:#02040c; }
+.console-world { position:fixed; inset:0; z-index:0; pointer-events:none; background:#02040c; }
+.console-world::after { content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 45%,transparent 35%,#01030955 100%); }
+html[data-experience-phase="boot"] .console-world::after { display:none; }
+.console-world.world-explore { pointer-events:auto;touch-action:none;cursor:grab; }
+.console-world.world-explore:active { cursor:grabbing; }
+.console-world[data-fallback="true"] { background:url('/ps2_assets/ps2_default_bg.png') center/cover; }
+.playcanvas-startup.boot-screen.boot-boot { background:transparent; }
+.playcanvas-startup.boot-screen { pointer-events:none; }
+.playcanvas-startup .boot-prompt,.playcanvas-startup .boot-skip { pointer-events:auto; }
+.world-curtain { position:fixed;inset:0;z-index:90;background:#000;opacity:0;pointer-events:none; }
+.world-curtain.travel-leaving { animation:portal-close .46s ease-in both;pointer-events:auto; }
+.world-curtain.travel-entering { animation:portal-open .52s .08s ease-out both;pointer-events:auto; }
+@keyframes portal-close { from{opacity:0} to{opacity:1} }
+@keyframes portal-open { from{opacity:1} to{opacity:0} }
+html[data-experience-phase="ready"] .login-page.is-arriving { animation:world-ui-arrive .42s .58s both; }
+html[data-world-navigation="leaving"] :is(.login-page,.console-app) {
+  animation:none;opacity:0;transform:translateY(-4px);transition:opacity .18s,transform .22s;pointer-events:none;
+}
+html[data-world-navigation="entering"] :is(.login-page,.console-app) { animation:world-ui-arrive .36s .2s both;pointer-events:none; }
+@keyframes world-ui-arrive { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.console-app,.login-page { font-family:Arial,Helvetica,sans-serif;font-size:14px;color:var(--ink); }
+.console-app :is(h1,h2,h3,strong,.console-nav-item>span,.player-level strong,.metric strong,.save-tile strong) {
+  font-family:Arial,Helvetica,sans-serif;
+}
+.console-app .console-header { height:80px;padding:0 max(32px,calc((100vw - 1120px)/2));
+  background:linear-gradient(#0c142b40,#04091912);border-bottom:1px solid #c4d8ff20; }
+.console-app .system-brand { gap:18px;color:#c3d9ff; }
+.console-app .system-brand .psold-font { font-size:35px; }
+.console-app .system-brand .brand-name { font:12px Arial,Helvetica,sans-serif;letter-spacing:.13em;color:#a7bbd8; }
+.console-app .console-sidebar { width:min(1120px,calc(100% - 64px));margin:0 auto;border-bottom-color:#c4d8ff26; }
+.console-app .console-sidebar nav { justify-content:space-between;gap:24px; }
+.console-app .console-nav-item { height:68px;color:#b4bdcf;gap:11px; }
+.console-app .console-nav-item>span:nth-last-child(2) { font:400 19px Arial,Helvetica,sans-serif;letter-spacing:.025em; }
+.console-app .console-nav-item svg { opacity:.7; }
+.console-app .console-nav-item:nth-child(4n+1) svg { color:#71cba9; }
+.console-app .console-nav-item:nth-child(4n+2) svg { color:#d17d8a; }
+.console-app .console-nav-item:nth-child(4n+3) svg { color:#73a6ff; }
+.console-app .console-nav-item:nth-child(4n) svg { color:#c386d9; }
+.console-app .console-nav-item.selected { color:#8be7ff;text-shadow:0 2px 2px #000,0 0 16px #43b7ff80; }
+.console-app .console-nav-item.selected svg { opacity:1; }
+.console-app .console-nav-item.selected::after { background:#96e3ff;box-shadow:0 0 12px #55b8ff77;height:1px; }
+.console-app .nav-index { display:none; }
+.console-app .console-content { width:min(1120px,calc(100% - 64px));max-width:1120px;margin:0 auto;padding:34px 0 75px; }
+.console-app .page-title { margin-bottom:25px; }
+.console-app .page-title h1 { font:400 34px Arial,Helvetica,sans-serif;letter-spacing:.025em;margin:0;color:#edf4ff;text-shadow:0 2px 5px #0009; }
+/* Backdrop filtering is limited to the large surfaces, never every nested row. */
+.console-app :is(.console-panel,.player-card),.login-page .login-form-area {
+  background:linear-gradient(130deg,#d8edff10,transparent 42%),linear-gradient(180deg,#14213a80,#040c1c72);
+  border:1px solid #c2dfff38;border-radius:10px;
+  box-shadow:inset 0 1px #eff8ff30,inset 0 -1px #02040d80,0 12px 40px #0003;
+  backdrop-filter:blur(3px) saturate(1.12);-webkit-backdrop-filter:blur(3px) saturate(1.12);
+}
+.console-app .player-card { padding:24px 26px 17px; }
+.console-app .player-card::before { height:1px;width:100%;background:linear-gradient(90deg,#c2e8ff77,transparent);box-shadow:none; }
+.console-app .player-card-top>.eyebrow { font-size:10px;letter-spacing:.16em;color:#b0c4df; }
+.console-app .player-avatar { background:linear-gradient(145deg,#a6c8fa35,#09152f40);border-color:#b2d5ff66;color:#e2f1ff;font-family:Arial,sans-serif; }
+.console-app .player-identity h2 { color:#eff5ff;font:400 29px Arial,Helvetica,sans-serif;letter-spacing:.01em; }
+.console-app .player-identity p { margin-top:8px; }
+.console-app .player-level strong { font:400 40px Arial,Helvetica,sans-serif;color:#d8edff; }
+.console-app :is(.player-level,.player-bottom) { border-color:#c5ddff25; }
+.console-app :is(.player-identity p,.player-level small,.player-bottom,.panel-heading>span,.panel-note) { color:#aebed4; }
+.console-app .panel-heading h2 { font:400 18px Arial,Helvetica,sans-serif;color:#e8f1ff; }
+.console-app .panel-note { font-size:11px; }
+.console-app .overview-toolbar>.eyebrow { font-size:10px;letter-spacing:.14em;color:#b1c4de; }
+.console-app .insight-grid { gap:14px; }
+.console-app .insight-card { background:linear-gradient(135deg,#d3eaff0c,transparent 50%),#08132878;border-color:#c6ddff2b;padding:20px 18px 18px;border-radius:8px;box-shadow:inset 0 1px #cceaff13; }
+.console-app .insight-card.primary { background:linear-gradient(135deg,#a6d4ff1b,#0a153180);border-color:#b1d6ff44; }
+.console-app .insight-card>span:not(.insight-icon) { color:#bed0e5;font-size:12px; }
+.console-app .insight-card strong { font:400 28px Arial,Helvetica,sans-serif;color:#f0f6ff;letter-spacing:-.035em;text-shadow:0 2px 4px #0007; }
+.console-app .insight-icon { color:#b0d7ff;left:18px; }
+.console-app .insight-card small,.console-app .insight-card em { color:#a4b8d1;font-size:10px; }
+.console-app .segmented { border-color:#c2dcff25;background:#050c1a5c; }
+.console-app .segmented button { color:#a8bfdc; }
+.console-app .segmented button.active { background:linear-gradient(#8eb8e52e,#476fa529);color:#e4f5ff;box-shadow:inset 0 1px #c8e7ff2b; }
+.console-app :is(.feed-row strong,.progress-record strong) { color:#d2e3f7;font-weight:400; }
+.console-app :is(.feed-row small,.progress-record small,.record-grade) { color:#9db5d1; }
+.console-app :is(.feed-row,.progress-record) { border-top-color:#b3d3ff1f; }
+.console-app .feed-type { background:#9ecbff16;color:#b4d6ff; }
+.console-app .save-tile { background:linear-gradient(145deg,#bbdcff12,#07122a6b);border-color:#b8d6ff30;box-shadow:inset 0 1px #d7efff12; }
+.console-app .save-tile:hover { background:linear-gradient(145deg,#a9d6ff29,#0b24448c);border-color:#b1e2ff88; }
+.console-app :is(.recent-item,.memory-summary) { background:#10213a50;border-color:#c2d9ff27; }
+.console-app .world-caption { display:block;z-index:4;left:auto;right:24px;bottom:22px;max-width:none; }
+.console-app .world-caption button { color:#bedcf9;border-color:#a4d7ff35;background:#08152c8f;border-radius:4px;font:12px Arial,sans-serif; }
+.console-app :is(.outline-button,.setting-row,.content-footer) { border-color:#b5d4ff2b; }
+.console-app .content-footer { justify-content:flex-end; }
+.console-app .preview-badge { color:#abc3e5;background:#0a1b3838;border-color:#b4d5ff30;font-size:8px; }
+.console-app .setting-row p { color:#a7bed9; }
+.console-app.is-exploring .console-content { animation:none;opacity:0;pointer-events:none; }
+.console-app.is-exploring .console-header,.console-app.is-exploring .console-sidebar { opacity:.12;pointer-events:none; }
+.console-app.is-exploring .world-caption { pointer-events:auto; }
+/* Login is a floating console prompt. It has no top bar or marketing copy. */
+.login-page .login-layout { min-height:100svh;display:grid;grid-template-columns:minmax(0,1fr) 400px;align-items:center;gap:clamp(40px,8vw,140px);width:min(1120px,calc(100% - 80px));margin:auto;padding:70px 0 90px; }
+.login-page .login-intro { position:static;max-width:none;margin:0;padding:0; }
+.login-page .login-wordmark { color:#b0ccff;font-size:clamp(80px,10vw,145px);line-height:1;margin:0;text-shadow:0 0 45px #538eff35; }
+.login-page .login-product { font:400 19px Arial,Helvetica,sans-serif;letter-spacing:.15em;margin:25px 0 0;color:#cadcf4; }
+.login-page .login-symbols { display:flex;gap:23px;margin-top:38px;opacity:.8; }
+.login-page .login-form-area { position:relative;width:100%;max-width:none;margin:0;padding:34px;top:auto;left:auto;right:auto;transform:none; }
+.login-page .login-form-area>h1 { margin:0 0 30px;font:400 32px Arial,Helvetica,sans-serif;letter-spacing:.025em;color:#edf5ff;text-shadow:0 2px 5px #0007; }
+.login-page .login-form-area form { margin:0; }
+.login-page .login-field { margin-bottom:22px; }
+.login-page .login-field label { display:block;font:12px Arial,Helvetica,sans-serif;color:#bdcde1;margin:0 0 10px;letter-spacing:.025em; }
+.login-page .login-input-wrap { display:flex;align-items:center;gap:13px;padding:0 15px;min-height:58px;overflow:hidden;
+  background:linear-gradient(180deg,#d4eaff10,#030c234d);border:1px solid #bbd7ff32;border-radius:6px;
+  box-shadow:inset 0 1px #e7f4ff17,inset 0 -8px 18px #00000013;transition:border-color .12s,box-shadow .12s; }
+.login-page .login-input-wrap:focus-within { border-color:#8de0ffad;box-shadow:inset 0 1px #d5f1ff33,0 0 0 3px #71cfff10,0 0 22px #3899ff12; }
+.login-page .field-symbol { flex:none;font:19px Arial,sans-serif;color:#9cbadf;opacity:.75; }
+.login-page .login-input-wrap:focus-within .field-symbol { color:#9ae9ff;opacity:1; }
+.login-page .login-input-wrap input { min-width:0;flex:1;width:100%;height:56px;padding:0;margin:0;border:0;border-radius:0;outline:0;background:transparent;color:#eef5ff;box-shadow:none;font:15px Arial,Helvetica,sans-serif; }
+.login-page .login-input-wrap input::placeholder { color:#7e98ba; }
+.login-page .login-input-wrap input:-webkit-autofill { -webkit-box-shadow:0 0 0 100px #14213a inset;-webkit-text-fill-color:#eef5ff; }
+.login-page .password-toggle { border:0;background:none;padding:7px 0;font:11px Arial,sans-serif;color:#a7bfdc; }
+.login-page .password-toggle:hover { color:#ddf6ff; }
+.login-page .connect-button { height:54px;width:100%;display:flex;align-items:center;justify-content:center;gap:12px;margin:26px 0 0;padding:0 17px;
+  color:#dff4ff;font:400 15px Arial,Helvetica,sans-serif;letter-spacing:.035em;
+  background:linear-gradient(180deg,#b4ddff2d,#3263982b);border:1px solid #b6ddff65;border-radius:5px;
+  box-shadow:inset 0 1px #eefaff38,0 4px 20px #0002;transition:background .12s,border-color .12s,text-shadow .12s; }
+.login-page .connect-button>span:first-child { margin-right:auto;font-size:21px; }
+.login-page .connect-button>span:last-child { margin-left:auto; }
+.login-page .connect-button:hover { background:linear-gradient(180deg,#c2eaff48,#3a9cd13b);border-color:#a5e8ff;text-shadow:0 0 12px #4bcdff; }
+.login-page .preview-link { display:flex;align-items:center;justify-content:center;gap:10px;margin-top:25px;padding-top:22px;border-top:1px solid #c6ddff20;font:12px Arial,sans-serif;color:#adc6e7; }
+.login-page .preview-link:hover { color:#a6edff;text-shadow:0 0 10px #3bcaff80; }
+.login-page .login-controls { position:fixed;z-index:2;left:5%;right:5%;bottom:23px;display:flex;align-items:center;justify-content:space-between;color:#9db4d4; }
+.login-page .login-controls button { font-size:12px; }
+.login-page .login-error-message { margin:0;color:#ffd0d8;border-color:#f18a9b99;background:#5c183133;font-size:12px; }
+.login-page.is-failed :is(.login-layout,.login-controls) { opacity:0;visibility:hidden;pointer-events:none; }
+.login-failure { position:fixed;inset:0;width:100vw;height:100svh;max-width:none;max-height:none;margin:0;padding:35px;border:0;color:#ffeef1;
+  background:radial-gradient(ellipse at center,#25040a0d,#100005a6 90%); }
+.login-failure::backdrop { background:transparent; }
+.login-failure[open] { display:grid;place-items:center;animation:failure-arrive .24s ease-out both; }
+.failure-content { display:flex;align-items:center;flex-direction:column;text-align:center;max-width:480px;font-family:Arial,Helvetica,sans-serif; }
+.failure-orbit { width:66px;height:66px;border:1px solid #ff8a9f88;border-radius:50%;box-shadow:0 0 35px #f8214240,inset 0 0 24px #fb224321;margin-bottom:32px; }
+.failure-content h1 { font-size:clamp(34px,4vw,54px);font-weight:400;letter-spacing:.035em;text-shadow:0 0 30px #f8375c50;margin:0 0 19px; }
+.failure-content p { color:#e6b5bf;font-size:14px;line-height:1.65;margin:0 0 33px; }
+.failure-retry { display:flex;gap:19px;align-items:center;padding:13px 24px;border:1px solid #ffa9b63d;border-radius:4px;background:linear-gradient(#ff98a71a,#5a14252b);color:#fff0f3;font:15px Arial,sans-serif;box-shadow:inset 0 1px #ffc2cf30; }
+.failure-retry>span { font-size:23px; }
+.failure-retry:hover { border-color:#ffd0dba0;background:#b32a4429; }
+.failure-content>.text-control { margin-top:26px;font-size:11px;color:#ce8a99; }
+@keyframes failure-arrive { from{opacity:0} to{opacity:1} }
+@media(max-width:980px) {
+  .console-app .console-header { padding:0 5%;height:70px; }
+  .console-app .console-content,.console-app .console-sidebar { width:90%; }
+  .console-app .console-sidebar nav { justify-content:flex-start;gap:27px; }
+  .console-app .console-nav-item { height:60px; }
+  .console-app .insight-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .login-page .login-layout { width:min(700px,90%);grid-template-columns:1fr 360px;gap:34px; }
+  .login-page .login-wordmark { font-size:76px; }
+  .login-page .login-form-area { padding:27px; }
+}
+@media(max-width:680px) {
+  .login-page .login-layout { width:min(390px,calc(100% - 38px));display:flex;flex-direction:column;justify-content:center;gap:30px;padding:54px 0 85px; }
+  .login-page .login-intro { text-align:center; }
+  .login-page .login-wordmark { font-size:76px; }
+  .login-page .login-product { font-size:13px;margin-top:15px; }
+  .login-page .login-symbols { display:none; }
+  .login-page .login-form-area { padding:25px; }
+  .login-page .login-form-area>h1 { font-size:27px;margin-bottom:25px; }
+  .login-page .login-controls { bottom:18px; }
+}
+@media(max-width:600px) {
+  .console-app .console-content { padding-top:27px; }
+  .console-app .system-brand .brand-name { display:none; }
+  .console-app .system-brand .psold-font { font-size:29px; }
+  .console-app .header-right { gap:10px; }
+  .console-app .page-title h1 { font-size:29px; }
+  .console-app .insight-grid { gap:10px; }
+  .console-app .insight-card { padding:17px 12px; }
+  .console-app .insight-icon { left:12px; }
+  .console-app .insight-card strong { font-size:25px; }
+  .console-app .player-card { padding:18px; }
+  .console-app .player-identity h2 { font-size:22px; }
+  .console-app .player-identity { gap:13px; }
+  .console-app .player-level { min-width:55px;padding-left:12px; }
+  .console-app .player-level strong { font-size:32px; }
+  .console-app .world-caption { right:12px;bottom:16px; }
+  .console-app .world-caption button { font-size:11px;padding:6px 10px; }
+  .console-app :is(.console-panel,.player-card) { backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);background-color:#08142733; }
+}
+@media(prefers-reduced-motion:reduce) {
+  html[data-experience-phase="ready"] .login-page.is-arriving,
+  html[data-world-navigation="entering"] :is(.login-page,.console-app),.login-failure[open] { animation:none; }
+}
+

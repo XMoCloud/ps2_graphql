@@ -1,1 +1,24 @@
-meow
+# PS2 GraphQL
+## Local development
+
+Run `npm run dev`, then open the local URL printed by Vite. The root route contains the real Reboot01 login. The four account menus are Overview, Projects, Audits and Skills. Projects opens 3D memory cards for the module and enrolled piscines, with quest browsers and individual save details. Development-only `/preview/dashboard` uses labeled sample records. Preview routes and sample records are excluded from the production build.
+
+Memory cards float and slowly turn on hover. Opening a card uses the recorded 1.7-second black fade in each direction, followed by “Now Loading...” and saves appearing at 250 ms intervals. The darker gray browser has clickable Back and page controls, with arrow-key/Enter selection and Escape/Backspace return. Detail icons rise into place and spin; each detail background shares its icon's hue. Project details include account-scoped team members, captains, language, team dates and grade history. System reduced-motion preferences shorten the sequence and stop continuous model animations.
+
+Live PlayCanvas 3D is the default: startup glass and sound, blue smoke and login pillars, then the purple crystal world. The interface uses transparent charcoal panels, silver borders, cyan selection and interactive Recharts graphs. Account-scoped, paginated queries load progression, results, event levels, skill history and given/received audits. The persistent world stops rendering behind the full-screen memory browser. Logout returns through the camera transition directly to login; startup plays only on initial entry. Rejected credentials retain the login form and change the animated background to red smoke and glass cubes.
+
+In the development server, open `/preview/startup` for synchronized playback, scrubbing, an overlay comparison, and cube wireframes against the original startup recording.
+
+See [the rendering notes](docs/PS2_STARTUP_RECONSTRUCTION.md) and [asset credits](docs/PS2_ASSETS.md) for implementation, browser support and licenses. Run `npm run build` and `npm test` for the production build and automated checks.
+
+Waves ambience starts immediately after successful authentication, before the camera transition, at its normal configured volume without an initial fade. Entering a memory card fades it to silence over 1.7 seconds and pauses the MP3; leaving the card fades it back in from the paused playback position. The UI uses outlined menu labels, thicker panel frames and sapphire/violet chart colors. Login includes distant, hazed short pillars around the main lattice, and the purple smoke continuously advects toward the viewer.
+
+The account controls share a centered, responsive glass-blurred top bar: branding and date on the left, tabs in the center, clock and username/logout on the right, within a maximum width of 1520 px. Header and login sound toggles are removed. Hover feedback is blue, selection is yellow, and the larger blue date/time labels have black outlines. Startup uses its previous fade-to-black ending before the login camera reveals the fixed pillar lattice. Memory slots are ordered Main projects, Go, JavaScript, Rust. Project and quest details omit Save location. Refresh data and Skip startup controls are removed from the normal interface. See [header screenshots and startup notes](docs/PS2_HEADER_REVIEW.md).
+
+Short distant pillars have opaque surfaces and write depth, so they correctly occlude other geometry. Their subdued appearance comes from reflected light and moving blue haze in the color shader, rather than surface transparency. The memory-card sound fade/pause/resume behavior is unchanged.
+
+## Production source cleanup
+
+Install with `npm ci`, test with `npm test`, and build with `npm run build`. Vercel uses the Vite preset and `dist` output. Generated dependencies, builds, local captures, reference archives, environment files and Vercel local state are Git-ignored. `node_modules` is no longer tracked; its local installation is retained.
+
+Only active PlayCanvas/UI dependencies remain. Original fallback footage, active fonts, sounds, textures and license notices are retained. Unused legacy components, the Three.js prototype and duplicate assets were removed. Reference recordings and source assets are preserved locally in `.references/`, outside `public/`. Tests, asset credits, development tools and design documentation remain in the repository without being published as runtime assets.
