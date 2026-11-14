@@ -13,6 +13,7 @@ import DashboardPage from "./DashboardPage";
 import MemoryBrowser from "./MemoryBrowser";
 import { AuditPage, SkillsPage } from "./StatusPages";
 import { MenuPrompts } from "./ConsoleKeys";
+import AboutPage, { AboutEntry } from "./AboutPage";
 
 const sections = [
   ["dashboard", "Overview"],
@@ -84,6 +85,11 @@ export default function ConsoleApp() {
       navigate("/");
     }, "login");
   };
+  if (key === "about") {
+    const allowed = sections.map(([id]) => `${base}/${id}`);
+    const backTo = allowed.includes(location.state?.returnTo) ? location.state.returnTo : `${base}/dashboard`;
+    return <AboutPage backTo={backTo} />;
+  }
   return (
     <div
       className={`console-app status-console section-${key} ${preview ? "is-preview" : ""}`}
@@ -145,7 +151,7 @@ export default function ConsoleApp() {
               {preview ? "Sample account" : data.user?.login || "Connecting"}
             </span>
             <button className="text-control exit-control" disabled={Boolean(e.navigation)} onClick={leave}>
-              {preview ? "Exit preview" : "Log out"} ↗
+              {preview ? "Exit preview" : "Log out"}
             </button>
           </div>
         </div>
@@ -178,6 +184,7 @@ export default function ConsoleApp() {
         )}
       </main>
       <MenuPrompts />
+      <AboutEntry to={`${base}/about`} returnTo={location.pathname} />
     </div>
   );
 }

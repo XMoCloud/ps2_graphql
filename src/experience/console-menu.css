@@ -1,6 +1,13 @@
-/* Menu treatment observed on imsaud.me: Helvetica-style display labels,
+/* Menu treatment observed on imsaud.me: its Helvetica Medium display face,
    grey/cyan selection, charcoal keycaps and a fine stationary CRT mask. */
-:root { --ps2-menu-face:"Helvetica Neue",Helvetica,Arial,sans-serif;--ps2-cyan:#28c8ff; }
+@font-face {
+  font-family: "Helvetica Medium";
+  src: url("../../fonts/Helvetica-Medium.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+:root { --ps2-menu-face:"Helvetica Medium",Helvetica,Arial,sans-serif;--ps2-cyan:#28c8ff;--menu-gray:#a0a0a0; }
 .console-screen-lines {
   position:fixed;inset:0;z-index:20000;pointer-events:none;
   background:repeating-linear-gradient(0deg,#0000002e 0 1px,transparent 1px 3px),

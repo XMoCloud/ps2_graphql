@@ -58,18 +58,44 @@ export function createGlassMaterial(environment,normalMap) {
 attribute vec3 aPosition;attribute vec3 aNormal;attribute vec2 aUv;
 uniform mat4 matrix_model;uniform mat4 matrix_viewProjection;
 varying vec3 world;varying vec3 normal;varying vec2 uv;
+varying vec3 localPoint;varying vec3 localNormal;
 void main(){vec4 p=matrix_model*vec4(aPosition,1.);world=p.xyz;
 normal=normalize(mat3(matrix_model)*aNormal);uv=aUv;
+localPoint=aPosition;localNormal=aNormal;
 gl_Position=matrix_viewProjection*p;}`,
     fragmentGLSL:`
 precision highp float;
 uniform sampler2D uSceneColorMap;uniform sampler2D normalMap;
 uniform samplerCube reflectionMap;
+uniform sampler2D menuEnvironment;uniform float menuEnvironmentEncoding;
+uniform mat4 matrix_view;uniform mat4 matrix_model;uniform mat4 matrix_viewProjection;
+uniform mat4 worldToCube;uniform float refractionDepth;
 uniform vec3 eye;uniform vec2 viewport;uniform vec3 cloudCenter;
 uniform vec3 laserPositions[4];uniform vec3 laserColors[4];
+uniform vec3 orbPositions[7];uniform float orbGain;
 uniform float uGain;uniform float errorAmount;
 varying vec3 world;varying vec3 normal;varying vec2 uv;
+varying vec3 localPoint;varying vec3 localNormal;
 vec3 linearColor(vec3 c){return pow(max(c,vec3(0.)),vec3(2.2));}
+vec3 environmentReflection(vec3 direction){
+ vec2 lookup=vec2(atan(direction.z,direction.x)/6.2831853+.5,
+   acos(clamp(direction.y,-1.,1.))/3.14159265);
+ vec4 texel=texture2D(menuEnvironment,lookup);
+ vec3 light=texel.rgb;
+ if(menuEnvironmentEncoding>.5&&menuEnvironmentEncoding<1.5) light*=exp2(texel.a*255.-128.);
+ if(menuEnvironmentEncoding<.5) light=linearColor(light);
+ return light/(light+vec3(2.));
+}
+// Trace both interfaces of the solid cube. A normal-offset screen sample alone
+// gives every face the same flat tint, especially against the dark menu fog.
+vec3 exitCube(vec3 origin,vec3 ray,out vec3 face){
+ vec3 safeRay=mix(vec3(-1.),vec3(1.),step(vec3(0.),ray))*max(abs(ray),vec3(.0001));
+ vec3 steps=(sign(safeRay)*.5-origin)/safeRay;
+ float distance=min(steps.x,min(steps.y,steps.z));
+ face=steps.x<=steps.y&&steps.x<=steps.z ? vec3(sign(ray.x),0.,0.)
+   : steps.y<=steps.z ? vec3(0.,sign(ray.y),0.) : vec3(0.,0.,sign(ray.z));
+ return origin+ray*max(0.,distance);
+}
 void main(){
  vec3 V=normalize(eye-world);
  vec3 micro=texture2D(normalMap,uv).rgb*2.-1.;
@@ -77,13 +103,41 @@ void main(){
  float facing=clamp(abs(dot(N,V)),0.,1.);
  float fresnel=.07+.72*pow(1.-facing,3.);
  vec2 screen=gl_FragCoord.xy/viewport;
- vec2 bend=N.xy*(.020+.016*(1.-facing));
+ vec3 viewNormal=normalize(mat3(matrix_view)*N);
+ vec2 bend=viewNormal.xy*(.020+.016*(1.-facing));
+ if(orbGain>.001){
+  vec3 incident=normalize(mat3(worldToCube)*(-V));
+  vec3 inside=refract(incident,normalize(localNormal),1./1.46);
+  vec3 face;
+  vec3 exitPoint=exitCube(localPoint+inside*.001,inside,face);
+  vec3 outgoing=refract(inside,-face,1.46);
+  // A side face can internally reflect once before the ray leaves the glass.
+  if(dot(outgoing,outgoing)<.001){
+   inside=reflect(inside,face);
+   exitPoint=exitCube(exitPoint+inside*.001,inside,face);
+   outgoing=refract(inside,-face,1.46);
+  }
+  if(dot(outgoing,outgoing)>.001){
+   vec3 exitWorld=(matrix_model*vec4(exitPoint,1.)).xyz;
+   vec3 direction=normalize(mat3(matrix_model)*outgoing);
+   vec3 directionView=mat3(matrix_view)*direction;
+   float exitDepth=(matrix_view*vec4(exitWorld,1.)).z;
+   float travel=max(0.,(-refractionDepth-exitDepth)/min(-.06,directionView.z));
+   vec4 projected=matrix_viewProjection*vec4(exitWorld+direction*travel,1.);
+   vec2 opticalUv=projected.xy/max(.001,projected.w)*.5+.5;
+   bend=mix(bend,clamp(opticalUv-screen,vec2(-.22),vec2(.22)),orbGain);
+  }
+ }
  vec2 sampleUv=clamp(screen+bend,vec2(.001),vec2(.999));
- vec3 transmitted=vec3(texture2D(uSceneColorMap,sampleUv+bend*.025).r,
- texture2D(uSceneColorMap,sampleUv).g,texture2D(uSceneColorMap,sampleUv-bend*.025).b);
+ vec2 dispersion=bend*mix(.025,.002,orbGain);
+ vec3 transmitted=vec3(texture2D(uSceneColorMap,clamp(sampleUv+dispersion,vec2(.001),vec2(.999))).r,
+ texture2D(uSceneColorMap,sampleUv).g,texture2D(uSceneColorMap,clamp(sampleUv-dispersion,vec2(.001),vec2(.999))).b);
  transmitted*=vec3(.97,.985,1.);
  vec3 R=reflect(-V,N);
  vec3 reflected=linearColor(textureCube(reflectionMap,R).rgb);
+ // Account glass shares the crystals' HDR lighting. Its neutral highlights
+ // reveal the bevels without painting a constant blue layer over every face.
+ if(orbGain>.001) reflected=mix(reflected,environmentReflection(R)*vec3(.70,.84,1.)*.7,orbGain);
  vec3 L=normalize(cloudCenter-world);
  float reach=1./(1.+dot(cloudCenter-world,cloudCenter-world)*.00022);
  reflected+=linearColor(vec3(.18,.35,.77))*pow(max(0.,dot(R,L)),5.)*reach;
@@ -96,6 +150,24 @@ void main(){
   float spec=pow(max(0.,dot(N,H)),88.);
   color+=linearColor(laserColors[i])*attenuation*spec*.32;
  }
+ // About glass reflects the actual clock positions, including their converging
+ // fan motion. A broad blue lobe surrounds a small white reflection; the
+ // refracted lobe appears through the opposite face as the cube tumbles.
+ if(orbGain>.001){
+  vec3 T=refract(-V,N,1./1.46);
+  vec3 orbital=vec3(0.);
+  for(int i=0;i<7;i++){
+   vec3 delta=orbPositions[i]-world, direction=normalize(delta);
+   float attenuation=1./(1.+dot(delta,delta)*.006);
+   float alignment=max(0.,dot(R,direction));
+   float halo=pow(alignment,4.);
+   float glint=pow(alignment,36.);
+   float through=pow(max(0.,dot(T,direction)),28.);
+   orbital+=attenuation*(linearColor(vec3(.16,.53,1.))*halo*.48
+     +vec3(.72,.91,1.)*glint*1.05+linearColor(vec3(.12,.38,.85))*through*.28);
+  }
+  color+=orbGain*orbital/(vec3(1.)+orbital)*.9;
+ }
  float edge=pow(1.-facing,2.);
  vec3 deathGlass=vec3(color.r*.95+color.b*.75,color.g*.24,color.b*.22);
  deathGlass+=linearColor(vec3(.32,.075,.10))*(.18+max(0.,dot(N,L))*.65+edge*.45)*reach;
@@ -105,9 +177,12 @@ void main(){
   m.name="PS2 refractive blue glass";m.blendType=pc.BLEND_NORMAL;
   m.depthWrite=true;m.cull=pc.CULLFACE_BACK;
   m.setParameter("reflectionMap",environment);m.setParameter("normalMap",normalMap);
+  m.setParameter("menuEnvironment",normalMap);m.setParameter("menuEnvironmentEncoding",0);
   m.setParameter("eye",[0,0,-60]);m.setParameter("viewport",[1280,800]);
   m.setParameter("cloudCenter",[0,0,-112]);m.setParameter("uGain",0);m.setParameter("errorAmount",0);
+  m.setParameter("worldToCube",pc.Mat4.IDENTITY.data);m.setParameter("refractionDepth",30.6);
   m.setParameter("laserPositions[0]",new Float32Array(12));m.setParameter("laserColors[0]",new Float32Array([.18,1,.08,1,.1,.5,1,.02,.08,.58,.22,1]));
+  m.setParameter("orbPositions[0]",new Float32Array(21));m.setParameter("orbGain",0);
   m.update();return m;
 }
 

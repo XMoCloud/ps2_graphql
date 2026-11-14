@@ -37,7 +37,7 @@ function Viewport() {
       >
         <Routes>
           <Route path="/" element={<Login />} />
-          {["dashboard", "projects", "audits", "skills"].flatMap((section) => [
+          {["dashboard", "projects", "audits", "skills", "about"].flatMap((section) => [
             <Route
               key={section}
               path={`/${section}`}

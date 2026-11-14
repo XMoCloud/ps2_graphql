@@ -63,31 +63,38 @@ void main() {
   vec3 N=normalize(vNormal+mat3(vTangent,vBitangent,vNormal)*vec3(micro.xy*.035,0.));
   float facing=abs(dot(N,V));
   float fresnel=.055+.76*pow(1.-facing,3.);
-  vec3 reflected=environment(reflect(-V,N));
-  vec3 refracted=environment(refract(-V,N,1./1.46));
-  vec3 color=ps2Linear(ccDiffuse)*(.52+.48*max(0.,dot(N,normalize(vec3(-.6,.8,1.)))));
-  // Deep tinted body, bright bevels and broad reflections reveal the six facets.
-  color+=reflected*ps2Linear(vec3(.48,.40,.78))*(.24+fresnel*.55);
-  color+=refracted*ps2Linear(ccDiffuse)*.35;
-  float cloud=texture2D(ccCloud,fract(vUv*.14+reflect(-V,N).xy*.32+.5)).r;
-  color+=ps2Linear(ccDiffuse)*cloud*.55;
-  color+=ps2Linear(vec3(.52,.43,.78))*pow(1.-facing,1.3)*.45;
-  // One glass material for every crystal. Cyan comes from a broad world-space
-  // blue light/reflection, so the bright facets migrate as the ring rotates.
-  vec3 key=normalize(vec3(-.78,.48,.54));
-  float keySpec=pow(max(0.,dot(reflect(-V,N),key)),7.);
-  float keyDiffuse=max(0.,dot(N,key));
-  color=mix(color,ps2Linear(vec3(.20,.59,.72)),clamp(keySpec*.72+keyDiffuse*.08,0.,.85));
+  vec3 R=reflect(-V,N), T=refract(-V,N,1./1.46);
+  vec3 reflected=environment(R), refracted=environment(T);
+  vec3 color=ps2Linear(ccDiffuse)*(.28+.38*max(0.,dot(N,normalize(vec3(-.6,.8,1.)))));
+  // The video alternates nearly black interior faces with blue-white bevels.
+  // Neutral specular light stays separate from violet absorption, so a bright
+  // reflected source can turn a face silver instead of merely lighter purple.
+  color+=reflected*ps2Linear(vec3(.60,.73,1.))*(.14+fresnel*1.4);
+  color+=refracted*ps2Linear(vec3(.25,.34,.68))*(.15+.34*(1.-facing));
+  float cloud=texture2D(ccCloud,fract(vUv*.14+R.xy*.32+.5)).r;
+  color+=ps2Linear(ccDiffuse)*cloud*.24;
+  color+=ps2Linear(vec3(.36,.43,.74))*pow(1.-facing,2.)*.22;
+  // Shared world lighting, never an index-specific cyan material. Its textured
+  // reflection migrates across the six broad faces during the complete turn.
+  vec3 key=normalize(vec3(-.40,-.55,.74));
+  float keyAlignment=max(0.,dot(R,key));
+  float keySpec=pow(keyAlignment,12.);
+  color+=ps2Linear(vec3(.23,.67,.85))*keySpec*(.8+cloud*1.2);
+  color+=vec3(.38,.65,.82)*pow(keyAlignment,48.)*.35;
+  color*=1.-vCap*.30;
   for(int i=0;i<7;i++) {
     vec3 L=ccOrbPositions[i]-vWorld;
-    float attenuation=1./(1.+dot(L,L)*.020);
-    vec3 H=normalize(normalize(L)+V);
-    float spec=pow(max(0.,dot(N,H)),18.);
-    float transmittedGlow=pow(max(0.,dot(-N,normalize(L))),2.)*.055;
-    color+=ps2Linear(vec3(.34,.65,1.))*attenuation*(spec*.55+max(0.,dot(N,normalize(L)))*.18+transmittedGlow);
+    float attenuation=1./(1.+dot(L,L)*.014);
+    vec3 direction=normalize(L);
+    float alignment=max(0.,dot(R,direction));
+    float spec=pow(alignment,42.);
+    float halo=pow(alignment,9.);
+    float transmitted=pow(max(0.,dot(T,direction)),20.);
+    color+=attenuation*(vec3(.78,.94,1.)*spec*1.35
+      +ps2Linear(vec3(.18,.58,1.))*halo*.32
+      +ps2Linear(vec3(.16,.39,.83))*transmitted*.22);
   }
-  color*=1.-vCap*.60;
-  gl_FragColor=vec4(color*uGain,.74*uGain);
+  gl_FragColor=vec4(color*uGain,(.68+fresnel*.22)*uGain);
 }`;
 
 export function referenceCrystal(device,normalTexture,index) {

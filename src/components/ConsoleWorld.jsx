@@ -1,7 +1,8 @@
-import React, { lazy, Suspense, useEffect, useRef } from "react";
+import React, { lazy, Suspense, useEffect, useLayoutEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useExperience } from "../experience/Experience";
 import { menuDirection } from "../experience/startup/menuMotion";
+import { ABOUT_ENTER_MS } from "../experience/startup/aboutMotion";
 import AssetWorld from "./AssetWorld";
 const StartupScene = lazy(() => import("./StartupScene"));
 
@@ -16,8 +17,12 @@ export default function ConsoleWorld() {
   const mode =
     location.pathname.replace("/preview", "").split("/")[1] || "login";
   const previousMode = useRef(mode),
+    modeAt = useRef(performance.now()),
+    aboutTransitionAt = useRef(-10000),
     travel = useRef({ id: 0, at: -10000, direction: 0 });
-  useEffect(() => {
+  useLayoutEffect(() => {
+    modeAt.current = performance.now();
+    if (mode === "about" || previousMode.current === "about") aboutTransitionAt.current = modeAt.current;
     const direction = menuDirection(previousMode.current, mode);
     if (direction)
       travel.current = {
@@ -26,7 +31,7 @@ export default function ConsoleWorld() {
         direction,
       };
     previousMode.current = mode;
-  }, [mode]);
+  }, [mode, e.phase]);
   useEffect(() => {
     if (!e.explore) offset.current = [0, 0];
   }, [e.explore]);
@@ -79,6 +84,8 @@ export default function ConsoleWorld() {
               }}
               options={() => ({
                 mode: e.phase === "ready" ? mode : "startup",
+                modeAge: (performance.now()-modeAt.current)/1000,
+                aboutExitAge: e.aboutLeaving ? (performance.now()-e.aboutExitAt.current)/1000 : -1,
                 arrival: e.motion
                   ? (performance.now() - e.readyAt.current) / 1000
                   : 10,
@@ -102,6 +109,8 @@ export default function ConsoleWorld() {
                   ? 0
                   : e.phase === "boot" ||
                       e.explore ||
+                      e.aboutLeaving ||
+                      performance.now() - aboutTransitionAt.current < ABOUT_ENTER_MS + 100 ||
                       performance.now() - travel.current.at < 1100 ||
                       performance.now() - e.readyAt.current < 1500 ||
                       performance.now() - e.navigationAt.current < 1200

@@ -7,7 +7,9 @@ export function installSceneFrame(app,camera) {
   // visibly posterizes the purple fog and light halos.
   frame.rendering.renderFormats=[pc.PIXELFORMAT_RG11B10F,pc.PIXELFORMAT_RGBA16F,pc.PIXELFORMAT_RGBA8];
   frame.rendering.toneMapping=pc.TONEMAP_LINEAR;
-  frame.rendering.sceneColorMap=false;frame.rendering.samples=4;
+  // Allocate the capture graph once. Switching this option on menu entry
+  // destroys/rebuilds the HDR/MSAA targets and causes a visible camera hitch.
+  frame.rendering.sceneColorMap=true;frame.rendering.samples=4;
   frame.bloom.intensity=0;
   const fallback=new pc.Texture(app.graphicsDevice,{width:1,height:1,format:pc.PIXELFORMAT_RGBA8,mipmaps:false});
   fallback.lock().set([60,80,120,255]);fallback.unlock();
@@ -21,5 +23,7 @@ export function installSceneFrame(app,camera) {
   });
   asset.on("error",()=>{glass.ready=true;app.renderNextFrame=true;});
   app.assets.add(asset);app.assets.load(asset);frame.update();
-  return {frame,glass,dispose:()=>{fallback.destroy();frame.destroy();}};
+  return {frame,glass,
+    setCapture:enabled=>{frame.renderPassCamera.colorGrabPass.enabled=enabled;},
+    dispose:()=>{fallback.destroy();frame.destroy();}};
 }

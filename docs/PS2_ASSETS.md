@@ -11,7 +11,8 @@ The live experience uses PlayCanvas, locally hosted textures and sounds, and aut
 - `public/ps2_assets/ps2_death_sound.mp3`: the full original death track normalized from approximately −36.2 to −21.4 LUFS, with a measured true peak of −2.25 dBTP. It loops during login rejection and 404 errors. The unmodified recording is preserved locally in `.references/public/ps2_assets/ps2_death_sound.original.mp3`.
 - `public/ps2_assets/post-startup-effect.mp3`: supplied by the user; a one-shot cue at the start of login arrival after startup. Logout retains its separate cue.
 - `public/ps2_assets/ps2_startup.mp4`, `ps2_menu_loop.mp4`, `ps2_death_loop.mp4`, and `ps2_default_bg.png`: original project footage/backgrounds retained for renderer recovery. Live generated geometry and smoke remain the default.
-- `fonts/PsOld-vmPMD.ttf`, `fonts/zrnic rg.ttf`, and `public/ps2_assets/ps2_logo.png`: existing project fonts and branding. Main menu labels use native Helvetica/Arial fallbacks; the proprietary imsaud.me font is not redistributed.
+- `fonts/PsOld-vmPMD.ttf`, `fonts/zrnic rg.ttf`, and `public/ps2_assets/ps2_logo.png`: existing project fonts and branding.
+- `fonts/Helvetica-Medium.ttf`: the exact Helvetica Medium face served by [imsaud.me](https://www.imsaud.me/Helvetica%20Medium.ttf), fetched at the user's request. Its metadata identifies a medium-weight face (500). Primary menu labels use synthesized bold (700); descriptions retain the medium face. This asset is not represented as an open-source font.
 
 The memory-card and save meshes use authored CSS 3D faces and SVG artwork. The previous PS2UI hardware prototypes, Glace experiment, Three.js renderer, unused original shader copies and duplicate raw menu sounds have been removed from production sources.
 

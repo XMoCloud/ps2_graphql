@@ -42,6 +42,8 @@ export default function Experience({ children }) {
   const [explore, setExplore] = useState(false);
   const [worldObscured, setWorldObscured] = useState(false);
   const [memoryAudioSuspended, setMemoryAudioSuspended] = useState(false);
+  const [aboutLeaving, setAboutLeaving] = useState(false);
+  const aboutExitAt = useRef(-10000);
   const loginAmbience = useRef(false);
   // New material revision restores live 3D even for the previous fallback default.
   const [renderer, setRenderer] = useState(() => read("ps2-renderer-v2", "3d"));
@@ -143,7 +145,7 @@ export default function Experience({ children }) {
     else stopErrorSound();
     return stopErrorSound;
   }, [sceneError, phase]);
-  const accountRoute = /^\/(?:preview\/)?(?:dashboard|projects|audits|skills)\/?$/.test(location.pathname);
+  const accountRoute = /^\/(?:preview\/)?(?:dashboard|projects|audits|skills|about)\/?$/.test(location.pathname);
   const accountActive = accountRoute && (location.pathname.startsWith("/preview/") || isAuthenticated());
   const beginAccountAmbience = () => {
     loginAmbience.current = true;
@@ -212,6 +214,9 @@ export default function Experience({ children }) {
         worldObscured,
         setWorldObscured,
         setMemoryAudioSuspended,
+        aboutLeaving,
+        setAboutLeaving,
+        aboutExitAt,
         beginAccountAmbience,
         setExplore,
         sceneError,

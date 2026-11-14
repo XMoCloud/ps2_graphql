@@ -80,7 +80,7 @@ export function AuditPage({ data }) {
               onChange={(e) => setTarget(Number(e.target.value))}
             >
               {[1, 1.2, 1.5, 2].map((n) => (
-                <option key={n}>{n.toFixed(1)}</option>
+                <option key={n} value={n}>{n.toFixed(1)}</option>
               ))}
             </select>
           </label>

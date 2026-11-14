@@ -58,6 +58,7 @@ const MENU_POSE = [0,0,30.6];
 export const WORLD_POSES = {
   login: [0,.06,LOGIN_DISTANCE], dashboard: MENU_POSE, projects: MENU_POSE,
   audits: MENU_POSE, skills: MENU_POSE, journey: MENU_POSE, system: MENU_POSE,
+  about: MENU_POSE,
 };
 export function shortestAngle(current, target) {
   return current + Math.atan2(Math.sin(target - current), Math.cos(target - current));

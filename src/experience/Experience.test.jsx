@@ -16,12 +16,21 @@ function Probe() {
     <button onClick={() => { e.beginAccountAmbience(); e.navigateWorld(() => navigate("/preview/dashboard"), "menu"); }}>Accepted login</button>
     <button onClick={() => e.setWorldObscured(true)}>Open memory</button>
     <button onClick={() => e.setWorldObscured(false)}>Close memory</button>
+    <button onClick={() => navigate("/preview/about")}>About</button>
     <button onClick={() => e.navigateWorld(() => navigate("/"), "login")}>Logout</button></>;
 }
 const mount = path => render(<MemoryRouter initialEntries={[path]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><Experience><Probe /></Experience></MemoryRouter>);
 beforeEach(() => { vi.useFakeTimers(); vi.clearAllMocks(); localStorage.clear(); sessionStorage.clear(); vi.stubGlobal("matchMedia", () => ({ matches: false })); });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.useRealTimers(); });
 describe("experience ambience and exit", () => {
+  it("keeps account ambience active when opening About", () => {
+    sessionStorage.setItem("ps2-booted", "1"); mount("/preview/dashboard");
+    const stops = stopDashboardLoop.mock.calls.length;
+    fireEvent.click(screen.getByText("About"));
+    expect(screen.getByRole("status").textContent).toBe("/preview/about:ready:");
+    expect(stopDashboardLoop).toHaveBeenCalledTimes(stops);
+    expect(fadeDashboardLoop).toHaveBeenLastCalledWith(true, 1700);
+  });
   it("plays the post-startup cue once at login arrival, including duplicate finish events", () => {
     mount("/");
     fireEvent.click(screen.getByText("Start boot"));

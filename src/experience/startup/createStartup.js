@@ -18,6 +18,8 @@ import { referenceCrystal } from "./referenceClock";
 import { installSceneFrame } from "./SceneFrame";
 import { renderPixelRatio } from "./renderQuality";
 import { DEATH_DISTANCE,DEATH_CLOUD,deathCubePose } from './failureScene';
+import { ABOUT_CUBE_COUNT, aboutCubePose } from "./aboutScene";
+import { aboutCubeScale } from "./aboutMotion";
 import { clockOrbit, smokeTravelDistance, smokeSpeed, rotationTravelDistance, crystalRotation, SMOKE_DRIFT } from "./menuMotion";
 import { crystalMesh, crystalPlacement, CRYSTAL_LAYOUT, WORLD_FOV, WORLD_POSES, shortestAngle, navigationPulse } from "./worldGeometry";
 import {
@@ -208,6 +210,7 @@ export function createStartup(canvas) {
   crystalRoot.setPosition(...CRYSTAL_LAYOUT.center);
   app.root.addChild(crystalRoot);
   const crystals = [];
+  let backgroundInCapture = false;
   fetch("/experience/crystal-clock/prism.obj", {signal: controller.signal})
     .then(r => { if (!r.ok) throw new Error("Crystal mesh unavailable"); return r.text(); })
     .then(source => {
@@ -226,6 +229,7 @@ export function createStartup(canvas) {
           placement.position, [1,1,1], 35+i);
         crystalRoot.addChild(e);
         e.setLocalRotation(placement.rotation);
+        e.render.layers=[backgroundInCapture ? atmosphere.id : worldLayer.id];
         crystals.push({entity:e, material:m});
       }
       textureReady = true;
@@ -349,30 +353,44 @@ export function createStartup(canvas) {
   });
 
   const tangent=new pc.Vec3(), view=new pc.Vec3(), side=new pc.Vec3();
+  const cubeInverses=cubes.map(()=>new pc.Mat4());
   const p0 = new pc.Vec3(), p1 = new pc.Vec3(), q = new pc.Quat(), rot = new pc.Quat();
   const orbit = { a: 0, e: .06, r: 35 };
-  let previousMode = "startup", lastWall = performance.now(), menuBlend = 0, failureBlend=0;
+  let previousMode = "startup", lastWall = performance.now(), menuBlend = 0, failureBlend=0, aboutBlend=0;
   let colorGrab=false;
   let smokeExtra=0,rotationExtra=0, previousRotationDistance=0, travelId=-1, previousTravelDistance=0, skipTravel=false;
-  let lastSmokeSpeed=.7, lastSmokeDepth=0, lastCrystalPhase=-10;
+  let lastSmokeSpeed=.7, lastSmokeDepth=0, lastCrystalPhase=-10, lastAboutCubeScale=0;
   const clockEpoch=Date.now();
   const cloudCenter = [0, 0, -112];
   function update(seconds, { motion = true, wireframe = false, mode = "startup",
-    arrival = 10, navigation = 10, navigationTarget="menu", navigationStage="",entryAge=10, orbitOffset = [0,0], sceneError = false,
+    arrival = 10, navigation = 10, navigationTarget="menu", navigationStage="",entryAge=10, modeAge=10, aboutExitAge=-1, orbitOffset = [0,0], sceneError = false,
     travel = {id:0,age:10,direction:0} } = {}) {
     const isWorld = mode !== "startup";
     // Retain the capture until red glass has finished fading on Retry.
-    const needsGrab=!isWorld || mode==="login" || sceneError || failureBlend>.001;
+    const needsGrab=!isWorld || mode==="login" || mode==="about" || sceneError || failureBlend>.001;
     if(needsGrab!==colorGrab) {
-      optical.frame.rendering.sceneColorMap=needsGrab;
+      optical.setCapture(needsGrab);
       colorGrab=needsGrab;
-      optical.frame.update();
     }
     const now = performance.now();
     // Damping follows elapsed wall time even when a frame is expensive. Capping
     // it to 50 ms stretches a 0.6 s transition into several seconds at low FPS.
     const dt = Math.min(1, Math.max(.001, (now - lastWall) / 1000));
     lastWall = now;
+    aboutBlend += ((mode === "about" ? 1 : 0) - aboutBlend) * (motion ? 1-Math.exp(-dt*10) : 1);
+    menuBlend += ((isWorld && mode !== "login" && !sceneError ? 1 : 0) - menuBlend) * (motion ? 1-Math.exp(-dt*10) : 1);
+    // Capture the complete animated background before the About glass is drawn.
+    // Copying only the opaque fog left no crystals or orbit lights to refract.
+    const captureBackground = mode === "about";
+    if (captureBackground !== backgroundInCapture) {
+      backgroundInCapture = captureBackground;
+      const layers = [captureBackground ? atmosphere.id : worldLayer.id];
+      crystals.forEach(({entity}) => { entity.render.layers=layers; });
+      lights.filter(light=>light.name.startsWith("clock")).forEach(light=>{
+        light.head.render.layers=layers;
+        light.ribbon.render.layers=layers;
+      });
+    }
     const state = cameraAt(motion ? seconds : Math.min(seconds, 2.35));
     const visibility = startupVisibility(seconds);
     const fade = visibility.blocks;
@@ -422,14 +440,14 @@ export function createStartup(canvas) {
       camera.setPosition(Math.sin(a)*Math.cos(elevation)*distance,
         Math.sin(elevation)*distance,-112+Math.cos(a)*Math.cos(elevation)*distance);
       const viewHeight=2*distance*Math.tan(WORLD_FOV*Math.PI/360);
-      const focusX=(.5-CRYSTAL_LAYOUT.screenCenter[0])*viewHeight*camera.camera.aspectRatio;
-      const focusY=(CRYSTAL_LAYOUT.screenCenter[1]-.5)*viewHeight;
+      const anchor=CRYSTAL_LAYOUT.screenCenter;
+      const focusX=(.5-anchor[0])*viewHeight*camera.camera.aspectRatio;
+      const focusY=(anchor[1]-.5)*viewHeight;
       camera.lookAt(new pc.Vec3(center.x+focusX*menuBlend*(1-failureBlend),focusY*menuBlend*(1-failureBlend),center.z));
       camera.rotateLocal(0,0,roll);
 
     }
     previousMode = mode;
-    menuBlend += ((isWorld && mode !== "login" && !sceneError ? 1 : 0) - menuBlend) * (motion ? 1-Math.exp(-dt*10) : 1);
     if (travel.id !== travelId) {
       travelId=travel.id;
       previousTravelDistance=0;
@@ -471,8 +489,10 @@ export function createStartup(canvas) {
     const toWorld = (x, y, target, distance = 40) =>
       camera.camera.screenToWorld(x*device.width, y*device.height, distance,
         target, device.width, device.height);
+    const crystalDepth=camera.forward.dot(center.clone().sub(camera.getPosition()));
+    lastAboutCubeScale=mode==="about" ? motion ? aboutCubeScale(modeAge,aboutExitAge) : 1 : 0;
     cubes.forEach((cube, i) => {
-      cube.enabled = exposure > .0001 && (!isWorld || mode==="login" || failureBlend>.01) && (i<2 || failureBlend<.999);
+      cube.enabled = exposure > .0001 && (!isWorld || mode==="login" || (mode==="about" && i<ABOUT_CUBE_COUNT) || failureBlend>.01) && (i<2 || failureBlend<.999);
       if(!cube.enabled) return;
       if (!isWorld) {
         const [x,y,width] = cubeProjection(i, motion ? seconds : 0);
@@ -482,6 +502,14 @@ export function createStartup(canvas) {
         const edge = width*2*distance*rayScale*VIRTUAL_ASPECT;
         cube.setLocalScale(edge,edge,edge);
         cube.setEulerAngles(...cubeAngles(i,motion ? seconds : 0));
+      } else if (mode === "about" && !sceneError) {
+        const pose=aboutCubePose(i,motion ? seconds : 0,device.width/device.height,crystalDepth);
+        const scale=lastAboutCubeScale;
+        if (scale<.0001) { cube.enabled=false; return; }
+        toWorld(pose.screen[0],pose.screen[1],p0,pose.depth);
+        cube.setPosition(p0);
+        cube.setLocalScale(pose.size*scale,pose.size*scale,pose.size*scale);
+        cube.setEulerAngles(...pose.rotation);
       } else {
         const a=i*Math.PI*2/5+seconds*.035;
         const login=[Math.cos(a)*13,Math.sin(a)*8,-104+Math.sin(a*1.7)*6];
@@ -493,10 +521,18 @@ export function createStartup(canvas) {
         cube.setEulerAngles(...rotation.map((n,j)=>n+(death.rotation[j]-n)*failureBlend));
       }
       const m=cubeMaterials[i];
-      m.setParameter("uGain",exposure*(i<2 ? 1 : 1-failureBlend));
+      m.depthWrite=true;
+      cube.render.meshInstances[0].drawOrder=(mode==="about" ? 45 : 30)+i;
+      m.setParameter("uGain",exposure*(mode==="about" ? aboutBlend : i<2 ? 1 : 1-failureBlend));
       m.setParameter("eye",camera.getPosition().toArray());
       m.setParameter("viewport",[device.width,device.height]);
       m.setParameter("errorAmount",failureBlend);
+      if(mode==="about") {
+        m.setParameter("worldToCube",cubeInverses[i].copy(cube.getWorldTransform()).invert().data);
+        m.setParameter("refractionDepth",crystalDepth);
+        m.setParameter("menuEnvironment",optical.glass.environment);
+        m.setParameter("menuEnvironmentEncoding",optical.glass.encoding);
+      }
       cube.render.meshInstances[0].renderStyle=wireframe?pc.RENDERSTYLE_WIREFRAME:pc.RENDERSTYLE_SOLID;
     });
     const pillarVisibility = isWorld && mode === "login" ? reveal*(1-failureBlend) : 0;
@@ -511,6 +547,7 @@ export function createStartup(canvas) {
       material.setParameter("uGain",exposure);
     });
     crystalRoot.enabled = isWorld && mode !== "login" && !sceneError && failureBlend<.01 && reveal > .001;
+    crystalRoot.setLocalScale(1,1,1);
     const crystalAngles=crystalRotation(seconds,rotationExtra);
     lastCrystalPhase=crystalAngles[1];
     crystalRoot.setEulerAngles(...crystalAngles);
@@ -519,6 +556,10 @@ export function createStartup(canvas) {
       clockOrbit(i,new Date(clockEpoch+seconds*1000),p0);
       pointPositions.set(p0.toArray(),i*3);
     }
+    cubeMaterials.forEach(material => {
+      material.setParameter("orbPositions[0]",pointPositions);
+      material.setParameter("orbGain",mode==="about" ? aboutBlend*(1-failureBlend) : 0);
+    });
     crystals.forEach(({material})=> {
       material.setParameter("uGain",reveal*menuBlend);
       material.setParameter("viewPos",camera.getPosition().toArray());
@@ -539,6 +580,7 @@ export function createStartup(canvas) {
     }
     for (const l of lights) {
       const clockLight=l.name.startsWith("clock");
+      if (clockLight) { l.mat.depthTest=mode==="about"; l.trailMat.depthTest=mode==="about"; }
       if (clockLight && (!isWorld || menuBlend < .001 || sceneError)) {
         l.head.enabled=l.ribbon.enabled=false;
         continue;
@@ -630,6 +672,9 @@ export function createStartup(canvas) {
         engine: "PlayCanvas",
         cubes: cubes.length,
         visibleCubes:cubes.filter(c=>c.enabled).length,
+        aboutCubeScale:lastAboutCubeScale,
+        crystalScale:crystalRoot.getLocalScale().x,
+        sceneCapture:optical.frame.renderPassCamera.colorGrabPass.enabled,
         pillars: field.length,
         visiblePillars: pillars.some(p => p.entity.enabled) ? field.length : 0,
         visibleCrystals: crystalRoot.enabled ? crystals.length : 0,

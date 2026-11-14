@@ -1,10 +1,10 @@
 /* Recorded reference: neutral charcoal browser, 1.7s black fades, 250ms saves.
    Only the selected model animates; the background renderer sleeps in the dialog. */
-.memory-library-intro p { font: 400 20px/1.4 var(--ps2-menu-face); color: #c0c1c5; }
-.card-choice-heading > strong { font: 400 22px/1.2 var(--ps2-menu-face); }
+.memory-library-intro p { font: 500 20px/1.4 var(--ps2-menu-face); color: var(--menu-gray); }
+.card-choice-heading > strong { font: 700 22px/1.2 var(--ps2-menu-face); color: var(--menu-gray); }
 .card-choice-heading > small { font-size: 11px; }
-.card-choice-caption { font-size: 15px; }
-.card-choice-caption small { font-size: 13px; }
+.card-choice-caption { font: 500 15px/1.6 var(--ps2-menu-face); color: var(--menu-gray); }
+.card-choice-caption small { font-size: 13px; color: var(--menu-gray); }
 .card-model-stage { filter: brightness(.66); transition: filter .3s; }
 .card-model-float { position: absolute; inset: 0; display: block; transform-style: preserve-3d; }
 .card-model { transition: transform .6s ease; }
@@ -29,7 +29,7 @@
   position: fixed; inset: 0; margin: 0; padding: 0;
   width: 100%; max-width: none; height: 100dvh; max-height: none;
   border: 0; box-sizing: border-box; overflow-x: hidden; overflow-y: auto;
-  color: #d6d6d6; font-family: var(--ps2-menu-face);
+  color: var(--menu-gray); font-family: var(--ps2-menu-face);
   background:
     radial-gradient(ellipse at 24% 36%, transparent 20%, #0007 100%),
     linear-gradient(110deg, #666 0%, #575757 36%, #303030 72%, #181818 100%);
@@ -51,12 +51,12 @@
   text-shadow: var(--memory-text-shadow); flex-shrink: 0;
 }
 .memory-browser-header h2, .memory-browser-header > span {
-  font: 500 clamp(25px, 2.2vw, 49px)/1.15 var(--ps2-menu-face); margin: 0;
+  font: 700 clamp(25px, 2.2vw, 49px)/1.15 var(--ps2-menu-face); margin: 0;
   overflow-wrap: anywhere; max-width: 46%; letter-spacing: -.025em;
 }
 .memory-browser-header > div { max-width: 52%; }
 .memory-browser-header h2 { max-width: none; }
-.memory-browser-header p { margin: 14px 0 0; font: 400 clamp(16px, 1.35vw, 28px)/1.35 var(--ps2-menu-face); color: #c6c6c6; }
+.memory-browser-header p { margin: 14px 0 0; font: 500 clamp(16px, 1.35vw, 28px)/1.35 var(--ps2-menu-face); color: var(--menu-gray); }
 .memory-browser-header > span { text-align: right; color: #e0ddec; }
 .save-browser-grid {
   display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -66,14 +66,14 @@
 .save-browser-item {
   appearance: none; position: relative; display: flex; flex-direction: column;
   align-items: center; min-width: 0; border: 0; background: none;
-  padding: 10px 0 20px; outline: none; color: #c5c5c5; cursor: pointer;
+  padding: 10px 0 20px; outline: none; color: var(--menu-gray); cursor: pointer;
   font-family: var(--ps2-menu-face);
 }
 .save-browser-item:disabled { opacity: 1; cursor: default; }
 .save-browser-item:focus-visible { outline: none; }
 .save-browser-item > strong {
   margin-top: 24px; max-width: 100%; overflow-wrap: anywhere;
-  font: 400 clamp(16px, 1.1vw, 24px)/1.3 var(--ps2-menu-face);
+  font: 700 clamp(16px, 1.1vw, 24px)/1.3 var(--ps2-menu-face);
   text-shadow: var(--memory-text-shadow); transition: color .15s;
   animation: memory-save-label .3s var(--save-delay) both;
 }
@@ -125,8 +125,8 @@
   text-shadow: var(--memory-text-shadow);
 }
 .memory-footer button, .memory-detail-back {
-  border: 0; background: none; color: #d4d4d4; cursor: pointer; padding: 8px;
-  font: 400 clamp(22px, 1.65vw, 36px)/1.2 var(--ps2-menu-face); text-shadow: var(--memory-text-shadow);
+  border: 0; background: none; color: var(--menu-gray); cursor: pointer; padding: 8px;
+  font: 700 clamp(22px, 1.65vw, 36px)/1.2 var(--ps2-menu-face); text-shadow: var(--memory-text-shadow);
 }
 .memory-footer button:is(:hover, :focus-visible), .memory-detail-back:is(:hover, :focus-visible) { color: #bfb6e5; outline: none; text-shadow: var(--memory-text-shadow), 0 0 10px #bfb6e566; }
 .memory-footer button:disabled { color: #8a8a8a; cursor: default; opacity: .5; }
@@ -153,22 +153,21 @@
 .save-object.large .save-object-model { animation: memory-save-spin 4s linear infinite; }
 .save-model-shadow { position: absolute; width: 75%; height: 40px; bottom: 15px; background: radial-gradient(ellipse, #0005, transparent 65%); }
 .save-detail-info { min-width: 0; max-height: 83vh; overflow-y: auto; padding: 5px 15px 20px; text-align: center; scrollbar-width: thin; scrollbar-color: #ffffff50 transparent; }
-.save-detail-info h3 { margin: 0 0 14px; font: 500 clamp(29px, 2.25vw, 48px)/1.15 var(--ps2-menu-face); color: #e0ddec; text-shadow: var(--memory-text-shadow); overflow-wrap: anywhere; }
-.save-detail-subtitle, .save-status { margin: 10px 0; font: 400 clamp(18px, 1.2vw, 25px)/1.4 var(--ps2-menu-face); color: #d2d2d2; text-shadow: var(--memory-text-shadow); }
-.save-status { color: #bdbbdc; }
+.save-detail-info h3 { margin: 0 0 14px; font: 700 clamp(29px, 2.25vw, 48px)/1.15 var(--ps2-menu-face); color: #e0ddec; text-shadow: var(--memory-text-shadow); overflow-wrap: anywhere; }
+.save-detail-subtitle, .save-status { margin: 10px 0; font: 500 clamp(18px, 1.2vw, 25px)/1.4 var(--ps2-menu-face); color: var(--menu-gray); text-shadow: var(--memory-text-shadow); }
 .save-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin: 30px 0; }
 .save-facts > div:last-child:nth-child(odd) { grid-column: 1/-1; }
-.save-facts dt { font-size: clamp(15px, 1vw, 21px); color: #b8babf; text-shadow: 1px 1px #000; }
-.save-facts dd { margin: 6px 0 0; font-size: clamp(18px, 1.25vw, 27px); color: #dedede; text-shadow: var(--memory-text-shadow); }
+.save-facts dt { font-size: clamp(15px, 1vw, 21px); color: var(--menu-gray); text-shadow: 1px 1px #000; }
+.save-facts dd { margin: 6px 0 0; font-size: clamp(18px, 1.25vw, 27px); color: #b5b5b5; text-shadow: var(--memory-text-shadow); }
 .save-team { margin-top: 24px; }
 .save-team-heading { display: flex; align-items: center; justify-content: center; gap: 15px; flex-wrap: wrap; font-size: clamp(18px, 1.2vw, 25px); color: #e0ddec; text-shadow: var(--memory-text-shadow); }
 .save-team-heading > small { color: #bec9c8; font-size: 14px; text-transform: capitalize; }
 .save-team ul { list-style: none; padding: 0; margin: 15px 0 0; }
 .save-team li { display: flex; justify-content: space-between; align-items: center; gap: 20px; text-align: left; padding: 10px 0; font-size: clamp(16px, 1.1vw, 23px); }
-.save-team li strong { font-weight: 400; color: #e0e0e0; }
-.save-team li small { display: block; margin-top: 4px; font-size: 15px; color: #b4c6cd; }
+.save-team li strong { font-weight: 500; color: #b5b5b5; }
+.save-team li small { display: block; margin-top: 4px; font-size: 15px; color: var(--menu-gray); }
 .save-member-role { font-size: 14px; color: #beb6d5; white-space: nowrap; }
-.save-team-date, .save-team-empty { color: #b5bfc1; font: 400 16px/1.5 var(--ps2-menu-face); }
+.save-team-date, .save-team-empty { color: var(--menu-gray); font: 500 16px/1.5 var(--ps2-menu-face); }
 .save-records { margin-top: 18px; font: 400 18px/1.5 var(--ps2-menu-face); color: #c5ced0; }
 .save-records summary { cursor: pointer; color: #cbd2d2; }
 .save-records summary:is(:hover, :focus-visible) { color: #bfb6e5; }
@@ -177,8 +176,8 @@
 .save-detail-path { overflow-wrap: anywhere; font: 14px/1.6 monospace; color: #bdc7c7; }
 .memory-detail-back {
   position: fixed; left: max(24px, 5vw); bottom: max(24px, env(safe-area-inset-bottom)); z-index: 12;
-  margin: 0; padding: 10px 18px; min-height: 46px; display: block; color: #dedede;
-  background: #07090ee8; border: 1px solid #a3a7b06b; border-radius: 2px;
+  margin: 0; padding: 10px 0; min-height: 46px; display: block; color: var(--menu-gray);
+  background: none; border: 0; border-radius: 0; box-shadow: none;
 }
 .detail-is-closing .save-detail-layer { animation: memory-detail-out .3s ease-in both; pointer-events: none; }
 .detail-is-closing .save-detail-model { animation: memory-detail-drop .4s ease-in both; }

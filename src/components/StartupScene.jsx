@@ -27,7 +27,7 @@ export default function StartupScene({
     let scene,
       last = -1,
       ready = false;
-    let renderedAt = -1000;
+    let nextRenderAt = 0, frameLimit = 0;
     let frames = 0;
     try {
       scene = createStartup(canvas.current);
@@ -47,9 +47,10 @@ export default function StartupScene({
           now = performance.now(),
           fps = typeof s.fps === "function" ? s.fps() : s.fps;
         if (fps <= 0) return;
-        if (now - renderedAt < 1000 / fps - 0.5) return;
+        if (fps !== frameLimit) { frameLimit = fps; nextRenderAt = now; }
+        if (now + 0.5 < nextRenderAt) return;
         const signature = `${t.toFixed(5)}:${s.motion}:${s.wireframe}:${options.mode}:${options.orbitOffset}:${options.sceneError}`;
-        if (last !== signature) {
+        if (last !== signature || !ready) {
           scene.render(t, {
             motion: s.motion,
             wireframe: s.wireframe,
@@ -60,6 +61,9 @@ export default function StartupScene({
           canvas.current.dataset.pillars = String(stats.visiblePillars);
           canvas.current.dataset.crystals = String(stats.visibleCrystals);
           canvas.current.dataset.cubes = String(stats.visibleCubes);
+          canvas.current.dataset.aboutCubeScale = stats.aboutCubeScale.toFixed(3);
+          canvas.current.dataset.crystalScale = stats.crystalScale.toFixed(3);
+          canvas.current.dataset.sceneCapture = String(stats.sceneCapture);
           canvas.current.dataset.rotationPhase = stats.crystalPhase.toFixed(3);
           canvas.current.dataset.smokeSpeed = stats.smokeSpeed.toFixed(3);
           canvas.current.dataset.smokeDepth = stats.smokeDepth.toFixed(3);
@@ -77,7 +81,10 @@ export default function StartupScene({
           canvas.current.dataset.opticalEnvironment = stats.opticalEnvironment;
           canvas.current.dataset.renderSize = `${stats.renderWidth}x${stats.renderHeight}`;
           last = signature;
-          renderedAt = now;
+          // Advance a deadline instead of restarting the interval on every
+          // frame. Small RAF jitter otherwise drops alternate animation frames.
+          const interval = 1000 / fps;
+          nextRenderAt = Math.max(nextRenderAt + interval, now + interval * .25);
         }
       });
       scene.app.on("frameend", () => {
