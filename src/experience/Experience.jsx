@@ -8,8 +8,11 @@ import {
   fadeDashboardLoop,
   startDashboardLoop,
   playStartupSound,
+  playPostStartupSound,
   stopStartupSound,
   stopDashboardLoop,
+  playErrorSound,
+  stopErrorSound,
 } from "../lib/sound";
 import { ExperienceContext as Context } from "./context";
 export { useExperience } from "./context";
@@ -61,12 +64,16 @@ export default function Experience({ children }) {
     navigationCommitAt = useRef(-10000),
     navigationTimers = useRef([]),
     navigationLock = useRef(false),
+    bootRunning = useRef(false),
     timer = useRef(),
     arrivalTimer = useRef();
   const finishBoot = () => {
+    const completedStartup = bootRunning.current;
+    bootRunning.current = false;
     clearTimeout(timer.current);
     stopStartupSound();
     readyAt.current = performance.now();
+    if (completedStartup && location.pathname === "/") playPostStartupSound();
     clearTimeout(arrivalTimer.current);
     setArrivalActive(true);
     arrivalTimer.current = setTimeout(() => setArrivalActive(false), 1400);
@@ -83,6 +90,7 @@ export default function Experience({ children }) {
     setArrivalActive(false);
     setExplore(false);
     bootAt.current = performance.now();
+    bootRunning.current = true;
     stopDashboardLoop();
     configureSound(sound, volume);
     playStartupSound();
@@ -130,6 +138,11 @@ export default function Experience({ children }) {
   useEffect(() => {
     document.documentElement.dataset.worldNavigation = navigation;
   }, [navigation]);
+  useEffect(() => {
+    if (sceneError && phase === "ready") playErrorSound();
+    else stopErrorSound();
+    return stopErrorSound;
+  }, [sceneError, phase]);
   const accountRoute = /^\/(?:preview\/)?(?:dashboard|projects|audits|skills)\/?$/.test(location.pathname);
   const accountActive = accountRoute && (location.pathname.startsWith("/preview/") || isAuthenticated());
   const beginAccountAmbience = () => {

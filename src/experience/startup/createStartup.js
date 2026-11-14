@@ -424,12 +424,12 @@ export function createStartup(canvas) {
       const viewHeight=2*distance*Math.tan(WORLD_FOV*Math.PI/360);
       const focusX=(.5-CRYSTAL_LAYOUT.screenCenter[0])*viewHeight*camera.camera.aspectRatio;
       const focusY=(CRYSTAL_LAYOUT.screenCenter[1]-.5)*viewHeight;
-      camera.lookAt(new pc.Vec3(center.x+focusX*menuBlend,focusY*menuBlend,center.z));
+      camera.lookAt(new pc.Vec3(center.x+focusX*menuBlend*(1-failureBlend),focusY*menuBlend*(1-failureBlend),center.z));
       camera.rotateLocal(0,0,roll);
 
     }
     previousMode = mode;
-    menuBlend += ((isWorld && mode !== "login" ? 1 : 0) - menuBlend) * (motion ? 1-Math.exp(-dt*10) : 1);
+    menuBlend += ((isWorld && mode !== "login" && !sceneError ? 1 : 0) - menuBlend) * (motion ? 1-Math.exp(-dt*10) : 1);
     if (travel.id !== travelId) {
       travelId=travel.id;
       previousTravelDistance=0;
@@ -445,15 +445,15 @@ export function createStartup(canvas) {
       rotationExtra+=turn-previousRotationDistance;
       previousRotationDistance=turn;
     }
-    lastSmokeDepth=seconds*(isWorld && mode!=="login" ? SMOKE_DRIFT : .7)+(isWorld ? smokeExtra : 0);
-    lastSmokeSpeed=isWorld && mode!=="login" && !skipTravel ? smokeSpeed(travel.age,travel.direction) : .7;
+    lastSmokeDepth=seconds*(isWorld && mode!=="login" && !sceneError ? SMOKE_DRIFT : .7)+(isWorld && !sceneError ? smokeExtra : 0);
+    lastSmokeSpeed=isWorld && mode!=="login" && !sceneError && !skipTravel ? smokeSpeed(travel.age,travel.direction) : .7;
     const rayScale = Math.tan((isWorld ? WORLD_FOV : VERTICAL_FOV)*Math.PI/360);
     fogMaterial.setParameter("eye", camera.getPosition().toArray());
     fogMaterial.setParameter("rayRight", camera.right.clone().mulScalar(rayScale*camera.camera.aspectRatio).toArray());
     fogMaterial.setParameter("rayUp", camera.up.clone().mulScalar(rayScale).toArray());
     fogMaterial.setParameter("rayForward", camera.forward.toArray());
     fogMaterial.setParameter("cloudCenter", cloudCenter);
-    fogMaterial.setParameter("crystalWorld", menuBlend);
+    fogMaterial.setParameter("crystalWorld", menuBlend*(1-failureBlend));
     fogMaterial.setParameter("worldStage",isWorld ? 1 : 0);
     fogMaterial.setParameter("smokeDepth",lastSmokeDepth);
     fogMaterial.setParameter("voidCenter",CRYSTAL_LAYOUT.center);
@@ -510,7 +510,7 @@ export function createStartup(canvas) {
       material.setParameter("cloudCenter",cloudCenter);
       material.setParameter("uGain",exposure);
     });
-    crystalRoot.enabled = isWorld && mode !== "login" && reveal > .001;
+    crystalRoot.enabled = isWorld && mode !== "login" && !sceneError && failureBlend<.01 && reveal > .001;
     const crystalAngles=crystalRotation(seconds,rotationExtra);
     lastCrystalPhase=crystalAngles[1];
     crystalRoot.setEulerAngles(...crystalAngles);
@@ -539,7 +539,7 @@ export function createStartup(canvas) {
     }
     for (const l of lights) {
       const clockLight=l.name.startsWith("clock");
-      if (clockLight && (!isWorld || menuBlend < .001)) {
+      if (clockLight && (!isWorld || menuBlend < .001 || sceneError)) {
         l.head.enabled=l.ribbon.enabled=false;
         continue;
       }

@@ -16,10 +16,35 @@ beforeEach(async () => {
 });
 afterEach(() => {
   sound.stopDashboardLoop();
+  sound.stopErrorSound();
   document.removeEventListener("visibilitychange", listener);
   vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.useRealTimers();
 });
 describe("waves ambience transport", () => {
+  it("keeps the louder death ambience playing until the error is cleared", () => {
+    const audio=sound.playErrorSound();
+    expect(audio.loop).toBe(true);
+    expect(audio.volume).toBeCloseTo(.45*.8);
+    vi.advanceTimersByTime(15000);
+    expect(audio.paused).toBe(false);
+    const hidden=vi.spyOn(document,"hidden","get").mockReturnValue(true);
+    document.dispatchEvent(new Event("visibilitychange"));
+    const plays=audio.play.mock.calls.length;
+    sound.stopErrorSound();
+    hidden.mockReturnValue(false);
+    document.dispatchEvent(new Event("visibilitychange"));
+    expect(audio.paused).toBe(true);
+    expect(audio.currentTime).toBe(0);
+    expect(audio.play).toHaveBeenCalledTimes(plays);
+  });
+  it("uses the supplied post-startup cue as a one-shot", () => {
+    sound.playPostStartupSound();
+    const audio=audios[0];
+    expect(audio.src).toBe("/ps2_assets/post-startup-effect.mp3");
+    expect(audio.loop).toBe(false);
+    expect(audio.play).toHaveBeenCalledTimes(1);
+    expect(audio.volume).toBeCloseTo(.45);
+  });
   it("prepares silently and starts accepted-login ambience at full configured gain without a fade", () => {
     sound.prepareDashboardLoop(); sound.prepareDashboardLoop();
     expect(audios).toHaveLength(1);

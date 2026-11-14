@@ -96,7 +96,10 @@ void main(){
   float spec=pow(max(0.,dot(N,H)),88.);
   color+=linearColor(laserColors[i])*attenuation*spec*.32;
  }
- color=mix(color,vec3(color.r*.8+color.b*.8,color.g*.04,color.b*.06),errorAmount);
+ float edge=pow(1.-facing,2.);
+ vec3 deathGlass=vec3(color.r*.95+color.b*.75,color.g*.24,color.b*.22);
+ deathGlass+=linearColor(vec3(.32,.075,.10))*(.18+max(0.,dot(N,L))*.65+edge*.45)*reach;
+ color=mix(color,deathGlass,errorAmount);
  gl_FragColor=vec4(color*uGain,1.);
 }`});
   m.name="PS2 refractive blue glass";m.blendType=pc.BLEND_NORMAL;

@@ -143,7 +143,7 @@
 .memory-detail-mode .memory-browser-surface { opacity: .09; pointer-events: none; }
 .save-detail-view {
   display: grid; grid-template-columns: 1fr 1.1fr; gap: 5vw; align-items: center;
-  min-height: 100%; padding: 7vh 8vw; box-sizing: border-box; max-width: 1800px; margin: 0 auto;
+  min-height: 100%; padding: 7vh 8vw 110px; box-sizing: border-box; max-width: 1800px; margin: 0 auto;
 }
 .save-detail-model {
   position: relative; min-height: 340px; display: flex; align-items: center; justify-content: center;
@@ -157,6 +157,7 @@
 .save-detail-subtitle, .save-status { margin: 10px 0; font: 400 clamp(18px, 1.2vw, 25px)/1.4 var(--ps2-menu-face); color: #d2d2d2; text-shadow: var(--memory-text-shadow); }
 .save-status { color: #bdbbdc; }
 .save-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin: 30px 0; }
+.save-facts > div:last-child:nth-child(odd) { grid-column: 1/-1; }
 .save-facts dt { font-size: clamp(15px, 1vw, 21px); color: #b8babf; text-shadow: 1px 1px #000; }
 .save-facts dd { margin: 6px 0 0; font-size: clamp(18px, 1.25vw, 27px); color: #dedede; text-shadow: var(--memory-text-shadow); }
 .save-team { margin-top: 24px; }
@@ -174,7 +175,11 @@
 .save-records ol { list-style: none; padding: 0; font-size: 16px; }
 .save-records li { display: flex; justify-content: space-between; padding: 7px 0; gap: 20px; }
 .save-detail-path { overflow-wrap: anywhere; font: 14px/1.6 monospace; color: #bdc7c7; }
-.memory-detail-back { margin: 24px auto 0; display: block; color: #bfb6e5; }
+.memory-detail-back {
+  position: fixed; left: max(24px, 5vw); bottom: max(24px, env(safe-area-inset-bottom)); z-index: 12;
+  margin: 0; padding: 10px 18px; min-height: 46px; display: block; color: #dedede;
+  background: #07090ee8; border: 1px solid #a3a7b06b; border-radius: 2px;
+}
 .detail-is-closing .save-detail-layer { animation: memory-detail-out .3s ease-in both; pointer-events: none; }
 .detail-is-closing .save-detail-model { animation: memory-detail-drop .4s ease-in both; }
 .detail-is-closing .memory-browser-surface { opacity: 1; }
@@ -221,7 +226,7 @@
   .memory-pagination { gap: 12px; font-size: 15px; }
   .memory-pagination button { font-size: 16px; padding: 5px 0; }
   .memory-page-range { display: none; }
-  .save-detail-view { grid-template-columns: 1fr; gap: 0; padding: 35px 6vw; }
+  .save-detail-view { grid-template-columns: 1fr; gap: 0; padding: 35px 6vw 110px; }
   .save-detail-model { min-height: 235px; }
   .save-object.large { width: 220px; }
   .save-detail-info { max-height: none; overflow: visible; padding: 0 6px 20px; }

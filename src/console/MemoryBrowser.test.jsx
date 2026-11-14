@@ -37,6 +37,9 @@ describe("memory browser transitions", () => {
     fireEvent.click(save);
     expect(screen.getByRole("heading", { name: "social-network" })).toBeTruthy();
     expect(screen.getByText("@player_two")).toBeTruthy();
+    expect(screen.queryByText(/Grade history/)).toBeNull();
+    expect(screen.getByText("Latest grade")).toBeTruthy();
+    expect(document.querySelector(".memory-detail-back").closest(".save-detail-info")).toBeNull();
     fireEvent.click(document.querySelector(".memory-detail-back"));
     tick(399);
     expect(document.querySelector(".save-detail-layer")).toBeTruthy();

@@ -233,9 +233,9 @@ export default function MemoryBrowser({ data }) {
           {item && <section className="save-detail-layer" style={{ "--detail-theme": appearance.theme, "--detail-light": appearance.light }}>
             <div className="save-detail-view">
               <div className="save-detail-model"><SaveIcon item={item} large /><span className="save-model-shadow" /></div>
-              <div className="save-detail-info"><SaveInformation item={item} userId={data.user?.id} />
-                <button className="memory-detail-back" onClick={back}>Back</button></div>
+              <div className="save-detail-info"><SaveInformation item={item} userId={data.user?.id} /></div>
             </div>
+            <button className="memory-detail-back" onClick={back}>Back</button>
           </section>}
           {fader}
         </>}

@@ -3,13 +3,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, useNavigate, useLocation } from "react-router-dom";
 import Experience, { useExperience } from "./Experience";
-import { fadeDashboardLoop, startDashboardLoop, stopDashboardLoop, playStartupSound } from "../lib/sound";
+import { fadeDashboardLoop, startDashboardLoop, stopDashboardLoop, playStartupSound, playPostStartupSound } from "../lib/sound";
+import { STARTUP_DURATION } from "./startup/timeline";
 import { PORTAL_COMMIT_MS, PORTAL_ENTER_MS } from "./startup/cinematics";
 vi.mock("../lib/auth", () => ({ isAuthenticated: () => false }));
-vi.mock("../lib/sound", () => ({ configureSound: vi.fn(), fadeDashboardLoop: vi.fn(), startDashboardLoop: vi.fn(), stopDashboardLoop: vi.fn(), playStartupSound: vi.fn(), stopStartupSound: vi.fn() }));
+vi.mock("../lib/sound", () => ({ configureSound: vi.fn(), fadeDashboardLoop: vi.fn(), startDashboardLoop: vi.fn(), stopDashboardLoop: vi.fn(), playStartupSound: vi.fn(), playPostStartupSound: vi.fn(), stopStartupSound: vi.fn(), playErrorSound: vi.fn(), stopErrorSound: vi.fn() }));
 function Probe() {
   const e = useExperience(), navigate = useNavigate(), location = useLocation();
   return <><output>{location.pathname}:{e.phase}:{e.navigation}</output>
+    <button onClick={e.startBoot}>Start boot</button>
     <button onClick={e.finishBoot}>Finish boot</button>
     <button onClick={() => { e.beginAccountAmbience(); e.navigateWorld(() => navigate("/preview/dashboard"), "menu"); }}>Accepted login</button>
     <button onClick={() => e.setWorldObscured(true)}>Open memory</button>
@@ -20,6 +22,16 @@ const mount = path => render(<MemoryRouter initialEntries={[path]} future={{ v7_
 beforeEach(() => { vi.useFakeTimers(); vi.clearAllMocks(); localStorage.clear(); sessionStorage.clear(); vi.stubGlobal("matchMedia", () => ({ matches: false })); });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.useRealTimers(); });
 describe("experience ambience and exit", () => {
+  it("plays the post-startup cue once at login arrival, including duplicate finish events", () => {
+    mount("/");
+    fireEvent.click(screen.getByText("Start boot"));
+    expect(playPostStartupSound).not.toHaveBeenCalled();
+    act(() => vi.advanceTimersByTime(STARTUP_DURATION*1000));
+    expect(playPostStartupSound).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("status").textContent).toBe("/:ready:");
+    fireEvent.click(screen.getByText("Finish boot"));
+    expect(playPostStartupSound).toHaveBeenCalledTimes(1);
+  });
   it("keeps login silent when startup finishes", () => {
     mount("/"); fireEvent.click(screen.getByText("Finish boot"));
     expect(screen.getByRole("status").textContent).toBe("/:ready:");
@@ -39,6 +51,7 @@ describe("experience ambience and exit", () => {
     act(() => vi.advanceTimersByTime(PORTAL_ENTER_MS));
     expect(screen.getByRole("status").textContent).toBe("/:ready:");
     expect(playStartupSound).not.toHaveBeenCalled();
+    expect(playPostStartupSound).not.toHaveBeenCalled();
   });
   it("starts waves at accepted login and keeps them uninterrupted through both camera stages", () => {
     sessionStorage.setItem("ps2-booted", "1"); mount("/");

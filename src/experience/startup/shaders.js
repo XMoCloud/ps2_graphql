@@ -140,9 +140,11 @@ void main(void) {
     vec3 blue=mix(vec3(.001,.002,.008),vec3(.10,.16,.46),pow(core,1.5));
     vec3 purple=mix(vec3(.012,.008,.028),vec3(.078,.045,.15),core);
     blue=mix(blue,purple,crystalWorld*.82);
-    vec3 deathRim=mix(vec3(.014,.007,.006),vec3(.09,.025,.030),clump);
-    vec3 deathCore=mix(vec3(.20,.018,.052),vec3(.80,.20,.39),pow(core,2.5));
-    blue=mix(blue,mix(deathRim,deathCore,pow(core,1.8)),errorAmount);
+    // The recording has warm brown outer curls and a bright raspberry core.
+    // Broad core falloff retains their shape instead of crushing all but a dot.
+    vec3 deathRim=mix(vec3(.026,.010,.009),vec3(.24,.10,.085),clump);
+    vec3 deathCore=mix(vec3(.38,.035,.075),vec3(1.05,.28,.47),pow(core,1.6));
+    blue=mix(blue,mix(deathRim,deathCore,pow(core,1.15)),errorAmount);
     blue*=.06+pow(clump,1.4)*1.5+pow(shaped,1.6)*4.;
     radiance+=transmittance*opacity*blue;
     transmittance*=1.-opacity;

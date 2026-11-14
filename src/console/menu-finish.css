@@ -97,7 +97,7 @@
 .console-topbar .console-nav-item > .nav-label { font: 500 21px/1.2 var(--ps2-menu-face); letter-spacing: 0; white-space: nowrap; text-shadow: var(--menu-outline); }
 .console-topbar .console-datetime {
   width: auto; margin: 0; padding: 0; display: block;
-  color: var(--menu-hover); font: 500 21px/1.2 var(--ps2-menu-face); letter-spacing: .025em;
+  color: #fff; font: 500 21px/1.2 var(--ps2-menu-face); letter-spacing: .025em;
   font-variant-numeric: tabular-nums; text-shadow: var(--menu-outline); white-space: nowrap;
 }
 .console-topbar .console-date { grid-column: 2; grid-row: 1; justify-self: start; }
@@ -157,3 +157,32 @@
   .console-account-actions .account-label { max-width: 48px; font-size: 11px; }
   .console-account-actions .exit-control { font-size: 11px; padding: 4px; }
 }
+
+/* A solid PS2 dialog with one focus frame, shared by mouse and keyboard. */
+.login-page { --login-focus: #71acff; --login-button: #003791; --login-button-hover: #124eb0; }
+.login-page .login-form-area {
+  background: #000; background-image: none; border: 2px solid #949ba6; border-radius: 3px;
+  box-shadow: 0 0 0 1px #000, 0 0 5px #e5ebf026;
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+.login-page .login-input-wrap { background: #060608; border: 1px solid #727882; box-shadow: none; border-radius: 0; }
+.login-page .login-input-wrap:is(:hover, :focus-within) { border-color: var(--login-focus); box-shadow: 0 0 5px #4779c12e; }
+.login-page .login-input-wrap input:is(:focus, :focus-visible) {
+  outline: none; outline-offset: 0; border: 0; box-shadow: none; color: var(--login-focus);
+}
+.login-page .login-input-wrap input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #060608 inset; -webkit-text-fill-color: #f0f0f0;
+}
+.login-page .password-toggle { border: 0; }
+.login-page .connect-button { background: var(--login-button); border: 1px solid #7196ce; box-shadow: none; color: #fff; }
+.login-page .connect-button:is(:hover, :focus-visible) { background: var(--login-button-hover); color: #fff; border-color: var(--login-focus); }
+.login-page .login-form-area::before, .login-page .login-form-area::after,
+.login-page .login-input-wrap::before, .login-page .login-input-wrap::after,
+.login-page .connect-button::before, .login-page .connect-button::after { content: none; display: none; }
+.login-page.is-error { --login-focus: #ff7384; --login-button: #8f102a; --login-button-hover: #b11936; }
+.login-page.is-error .login-form-area { border-color: #ae5260; box-shadow: 0 0 0 1px #000, 0 0 12px #ab152a33; }
+.login-page.is-error .login-input-wrap { border-color: #91404d; }
+.login-page.is-error .login-input-wrap:is(:hover, :focus-within) { border-color: var(--login-focus); box-shadow: 0 0 7px #b1193640; }
+.login-page.is-error .login-field label, .login-page.is-error .password-toggle { color: #f0a8b3; }
+.login-page.is-error .connect-button { border-color: #d4576a; }
+.login-page.is-error .login-wordmark { text-shadow: var(--menu-outline-small), 0 0 8px #fff6, 0 0 26px #d427506b; }

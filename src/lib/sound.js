@@ -4,6 +4,7 @@ const sources = {
   menu_open: "/experience/audio/menu-open.mp3",
   menu_confirm: "/experience/audio/menu-confirm.mp3",
   logout: "/experience/audio/menu-back.mp3",
+  post_startup: "/ps2_assets/post-startup-effect.mp3",
 };
 let audioContext;
 // Decode short cues once, unlocked in the submit/start gesture. Unlike starting
@@ -160,6 +161,7 @@ export const playStartupSound = () => {
   unlockAudio();
   return play("startup_sound", 1);
 };
+export const playPostStartupSound = () => play("post_startup", 1);
 export const stopStartupSound = () => {
   const item = tracks.get("startup_sound");
   if (item) {
@@ -186,19 +188,18 @@ export const playLoginSound = () => {
 };
 export const playBackSound = () => play("logout", 0.65);
 export const playLogoutSound = () => play("logout", 0.7);
-let errorTimer;
 export const stopErrorSound = () => {
-  clearTimeout(errorTimer);
   const item = tracks.get("death_sound");
   if (item) {
+    paused.delete(item.audio);
     item.audio.pause();
     item.audio.currentTime = 0;
   }
 };
 export const playErrorSound = () => {
-  clearTimeout(errorTimer);
-  const audio = play("death_sound", 0.45);
-  errorTimer = setTimeout(() => audio.pause(), 5500);
+  const audio = play("death_sound", 0.8, true);
+  paused.delete(audio);
+  return audio;
 };
 function onVisibilityChange() {
   tracks.forEach(({ audio }, name) => {
@@ -213,7 +214,7 @@ function onVisibilityChange() {
 }
 document.addEventListener("visibilitychange", onVisibilityChange);
 if (import.meta.hot) import.meta.hot.dispose(() => {
-  clearTimeout(wavesFadeTimer); clearTimeout(errorTimer);
+  clearTimeout(wavesFadeTimer);
   document.removeEventListener("visibilitychange", onVisibilityChange);
   tracks.forEach(({ audio }) => audio.pause());
   voices.forEach(({ source }) => { try { source.stop(); } catch {} });

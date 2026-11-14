@@ -2,7 +2,7 @@
 
 14 November 2026.
 
-The account UI has one responsive top bar. Its controls are centered within a maximum width of 1520 px, keeping branding/date and clock/account controls close to the tabs rather than at the screen edges. Date and clock use blue 21 px menu typography with the same black outline as the other menu labels. Account and login sound toggles have been removed. The background retains translucent glass with a 14 px backdrop blur. Tablet uses two rows; phones put branding/account controls first, date/clock second, and tabs third. Login continues without an account bar.
+The account UI has one responsive top bar. Its controls are centered within a maximum width of 1520 px, keeping branding/date and clock/account controls close to the tabs rather than at the screen edges. Date and clock now use white 21 px menu typography with the same black outline as the other menu labels. Account and login sound toggles have been removed. The background retains translucent glass with a 14 px backdrop blur. Tablet uses two rows; phones put branding/account controls first, date/clock second, and tabs third. Login continues without an account bar.
 
 Blue hover and yellow selection feedback are restored across account tabs, chart switches, memory cards, saves and login controls, retaining black text outlines. The ordinary Refresh data and Skip startup buttons are removed. Failed data requests retain their contextual Retry action, and a failed renderer retains its original-background recovery action.
 
@@ -10,7 +10,7 @@ The previous startup animation has been restored: its recorded camera path and l
 
 Memory cards use an explicit display order independent of GraphQL event IDs: 01 Main projects, 02 Go piscine, 03 JavaScript piscine, 04 Rust piscine. Their underlying account records remain associated with the original card IDs.
 
-Project and piscine exercise details omit the Save location section and its raw record path. Team membership, grade history and other save information remain available.
+Project and piscine exercise details omit the Save location section, its raw record path and grade history. Team membership and the latest grade remain available. Back stays fixed at the bottom-left outside scrolling detail content.
 
 ## Screenshots
 

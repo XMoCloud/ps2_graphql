@@ -9,7 +9,7 @@ Reference: the supplied 22.7-second recording, inspected in quarter-second frame
 - The gray browser displays ?Now Loading...? while saves appear every 250 ms, scaling in over 300 ms. Selection unlocks when the sequence finishes.
 - Save icons stay at 55% brightness until selected, with a breathing white glow. Search, status filters and decorative keycaps have been removed. Back, pagination, arrow navigation, Enter, Escape and Backspace are functional.
 - Details fade in over 300 ms; the icon rises from 40vh below over 400 ms and rotates a complete turn every 4 seconds. Each detail environment uses the same hue as its save artwork.
-- Project details include real team members, captain, language metadata, team formation date and grade history, matched by exact project path and object identity. Missing records remain explicitly unavailable.
+- Project details include real team members, captain, language metadata, team formation date and the latest grade, matched by exact project path and object identity. Grade history is omitted. Back stays fixed at the bottom-left outside the scrolling information. Missing records remain explicitly unavailable.
 - On phones, the save area scrolls independently, keeping Back and page actions visible. Reduced-motion preferences shorten the sequence and stop continuous rotation.
 
 ## Captures

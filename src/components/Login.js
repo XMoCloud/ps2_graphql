@@ -6,7 +6,6 @@ import {
   playLoginSound,
   prepareDashboardLoop,
   unlockAudio,
-  playErrorSound,
   playHoverSound,
   stopErrorSound,
   stopDashboardLoop,
@@ -56,7 +55,6 @@ export default function Login() {
         setPassword("");
         stopDashboardLoop();
         e.setSceneError(true);
-        playErrorSound();
         requestAnimationFrame(() => document.getElementById("password")?.focus());
       } else setError(message || "Could not connect. Please try again.");
     } finally {
@@ -65,7 +63,7 @@ export default function Login() {
   };
   return (
     <div
-      className={`login-page ${e.arrivalActive ? "is-arriving" : ""}`}
+      className={`login-page ${e.arrivalActive ? "is-arriving" : ""} ${e.sceneError ? "is-error" : ""}`}
     >
       <div className="login-layout">
         <div className="login-intro">
@@ -95,6 +93,8 @@ export default function Login() {
                   id="identifier"
                   autoComplete="username"
                   required
+                  onPointerEnter={playHoverSound}
+                  onPointerDown={playClickSound}
                   value={identifier}
                   onChange={(event) => {
                     setIdentifier(event.target.value);
@@ -118,6 +118,8 @@ export default function Login() {
                   autoComplete="current-password"
                   type={showPassword ? "text" : "password"}
                   required
+                  onPointerEnter={playHoverSound}
+                  onPointerDown={playClickSound}
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   placeholder="Your password"
@@ -126,7 +128,8 @@ export default function Login() {
                 <button
                   type="button"
                   className="password-toggle"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onMouseEnter={playHoverSound}
+                  onClick={() => { playClickSound(); setShowPassword(!showPassword); }}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? "Hide" : "Show"}

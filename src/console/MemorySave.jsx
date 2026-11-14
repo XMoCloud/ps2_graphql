@@ -60,10 +60,6 @@ function Team({ team, userId }) {
 }
 
 export function SaveInformation({ item, userId }) {
-  const grades = [
-    ...item.history.map(r => ({ ...r, source: "Result" })),
-    ...item.progress.filter(r => r.grade != null).map(r => ({ ...r, source: "Progression", createdAt: r.updatedAt || r.createdAt })),
-  ].sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
   const teams = item.teams || [];
   const attrs = teams[0]?.object?.attrs || {};
   const language = typeof attrs.language === "string" ? attrs.language : null;
@@ -75,7 +71,6 @@ export function SaveInformation({ item, userId }) {
       <div><dt>Earned XP</dt><dd>{xp(item.xp)}</dd></div>
       <div><dt>Latest grade</dt><dd>{item.grade == null ? "Ungraded" : `${Math.round(item.grade * 100)}%`}</dd></div>
       <div><dt>Last saved</dt><dd>{date(item.updatedAt || item.createdAt)}</dd></div>
-      <div><dt>Saved grades</dt><dd>{grades.length}</dd></div>
     </dl>
     {teams.length ? <>
       <Team team={teams[0]} userId={userId} />
@@ -83,10 +78,5 @@ export function SaveInformation({ item, userId }) {
         {teams.slice(1).map(team => <Team key={team.id} team={team} userId={userId} />)}
       </details>}
     </> : <p className="save-team-empty">No team membership record is available for this save.</p>}
-    <details className="save-records">
-      <summary>Grade history ({grades.length})</summary>
-      <ol>{grades.map(r => <li key={`${r.source}-${r.id}`}><span>{date(r.createdAt)} · {r.source}</span><strong>{Math.round(r.grade * 100)}%</strong></li>)}</ol>
-      {!grades.length && <p>No graded results recorded yet.</p>}
-    </details>
   </>;
 }
