@@ -2,13 +2,23 @@
 // Query templates contain no credentials, user identifiers or contact fields.
 const page = "$userId: Int!, $limit: Int! = 500, $offset: Int! = 0";
 export const ACCOUNT_QUERIES = {
+  community: `query ConsoleCommunity($limit: Int! = 500, $offset: Int! = 0) {
+    event_user(where: {event: {path: {_eq: "/bahrain/bh-module"}}}, order_by: {id: asc}, limit: $limit, offset: $offset) {
+      id userId eventId level userAuditRatio
+    }
+  }`,
+  cohorts: `query ConsoleCohorts($limit: Int! = 500, $offset: Int! = 0) {
+    label(where: {name: {_ilike: "cohort%"}}, order_by: {id: asc}, limit: $limit, offset: $offset) {
+      id name description
+    }
+  }`,
   profile: `query ConsoleProfile($userId: Int!) {
     user(where: {id: {_eq: $userId}}) {
       id login firstName lastName createdAt campus auditRatio totalUp totalDown
     }
     moduleXP: transaction_aggregate(where: {userId: {_eq: $userId}, type: {_eq: "xp"}, event: {path: {_eq: "/bahrain/bh-module"}}}) { aggregate { sum { amount } } }
     allXP: transaction_aggregate(where: {userId: {_eq: $userId}, type: {_eq: "xp"}}) { aggregate { sum { amount } } }
-    event_user(where: {userId: {_eq: $userId}}) { id level event { path } }
+    event_user(where: {userId: {_eq: $userId}}) { id eventId level event { path } }
   }`,
   transactions: `query ConsoleTransactions(${page}) {
     transaction(where: {userId: {_eq: $userId}, _or: [{type: {_in: ["xp", "level", "up", "down"]}}, {type: {_like: "skill_%"}}]}, order_by: {id: asc}, limit: $limit, offset: $offset) {

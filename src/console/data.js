@@ -46,7 +46,7 @@ function createSampleAccount() {
         id: i + 1,
         objectId: i + 1,
         amount: [
-          96000, 480000, 145000, 319000, 290000, 75000, 105000, 81000, 74000,
+          96000, 480000, 145000, 319000, 290000, 75250, 105000, 81037, 74000,
           68000, 64000, 54000,
         ][i],
         createdAt: new Date(Date.UTC(2026, 10 - i, 5 + i)).toISOString(),
@@ -73,6 +73,8 @@ function createSampleAccount() {
       ["algo", 48],
       ["front-end", 57],
       ["back-end", 52],
+      ["rust", 40], ["unix", 22], ["graphql", 26], ["tcp", 35],
+      ["game", 32], ["ai", 24], ["sys-admin", 18],
     ].map(([type, amount]) => ({ type: `skill_${type}`, amount })),
     up: 2450000,
     down: 1780000,
@@ -93,7 +95,7 @@ function createSampleAccount() {
   }));
   SAMPLE.totalXP = SAMPLE.transactions.reduce((n, t) => n + t.amount, 0);
   SAMPLE.events = [
-    { id: 1, level: 34, event: { path: MODULE_ROOT } },
+    { id: 1, eventId:400, level: 34, event: { path: MODULE_ROOT } },
     ...[
       "/bahrain/bh-piscine",
       `${MODULE_ROOT}/piscine-js`,
@@ -106,6 +108,10 @@ function createSampleAccount() {
     event: { path: MODULE_ROOT },
   }));
   SAMPLE.allProgress = [...SAMPLE.progress];
+  SAMPLE.allProgress.push(...SAMPLE.events.slice(1).map((r,i) => ({
+    id:9000+i, objectId:9000+i, path:r.event.path, grade:1, isDone:true,
+    createdAt:"2026-01-01", object:{id:9000+i,name:r.event.path.split('/').at(-1),type:"piscine"},
+  })));
   SAMPLE.results = SAMPLE.projects.map((r) => ({ ...r, type: "user_audit" }));
   SAMPLE.events.slice(1).forEach((event, pi) => {
     const exercises = [
@@ -151,7 +157,7 @@ function createSampleAccount() {
         type: skill.type,
         amount: Math.round(skill.amount * fraction),
         createdAt: new Date(
-          Date.UTC(2025, 2 + step * 4, index + 1),
+          Date.UTC(2026, 2 + step * 4, index % 10 + 1),
         ).toISOString(),
       })),
     ),
@@ -193,6 +199,11 @@ function createSampleAccount() {
       ],
     },
   }));
+  SAMPLE.communityUsers = Array.from({length:160}, (_,i) => ({
+    id:i+1,userId:i+1,eventId:[100,200,300,400][i%4],level:(i*17)%72,userAuditRatio:Math.round(((i*13)%260))/100,
+  }));
+  SAMPLE.communityUsers[0]={id:1,userId:"DEMO",eventId:400,level:34,userAuditRatio:SAMPLE.up/SAMPLE.down};
+  SAMPLE.communityCohorts=[1,2,3,4].map(n=>({id:n,name:`Cohort${n}`,description:`Module #${n*100}`}));
   return SAMPLE;
 }
 // Development previews and tests keep fixtures out of the production bundle.
@@ -216,6 +227,8 @@ const initial = {
   auditsReceived: [],
   groups: [],
   allXP: null,
+  communityUsers: [],
+  communityCohorts: [],
 };
 export function useAccount(preview = false) {
   preview = import.meta.env.DEV && preview;
@@ -237,6 +250,10 @@ export function useAccount(preview = false) {
       return;
     }
     const queries = [
+      ["Community distribution", ACCOUNT_QUERIES.community, "event_user",
+        d => ({ communityUsers: d.event_user })],
+      ["Cohort definitions", ACCOUNT_QUERIES.cohorts, "label",
+        d => ({ communityCohorts: d.label })],
       [
         "Profile",
         ACCOUNT_QUERIES.profile,
@@ -320,9 +337,10 @@ export function useAccount(preview = false) {
     ];
     const result = await Promise.allSettled(
       queries.map(async ([label, query, collection, parse]) => {
+        const variables = [ACCOUNT_QUERIES.community,ACCOUNT_QUERIES.cohorts].includes(query) ? {} : { userId };
         const response = collection
-          ? await graphqlPages(query, collection, graphqlQuery, { userId })
-          : await graphqlQuery(query, { userId });
+          ? await graphqlPages(query, collection, graphqlQuery, variables)
+          : await graphqlQuery(query, variables);
         return parse(response);
       }),
     );

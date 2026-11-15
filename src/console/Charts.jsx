@@ -10,19 +10,15 @@ import {
   BarChart,
   Bar,
   Legend,
-  RadarChart,
-  Radar,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
   PieChart,
   Pie,
   Cell,
   LineChart,
   Line,
 } from "recharts";
-import { xp } from "./data";
+import { xp, date } from "./data";
 import { byTime, monthlySeries } from "./catalog";
+import { skillHistory } from "./analytics";
 export const chartColors = ["#3b5fba", "#7350aa", "#5264a3", "#934f9e"];
 const axis = {
   tick: { fill: "#b5bfd0", fontSize: 11, fontFamily: "Arial" },
@@ -248,10 +244,10 @@ export function ExchangeChart({ rows, counts = false }) {
     </div>
   );
 }
-export function OutcomeChart({ passed, other }) {
+export function OutcomeChart({ passed, failed }) {
   const rows = [
-    { name: "Passed", value: passed },
-    { name: "Not passed / ungraded", value: other },
+    { name: "Passed attempts", value: passed },
+    { name: "Failed attempts", value: failed },
   ];
   return (
     <div className="outcome-chart">
@@ -272,12 +268,12 @@ export function OutcomeChart({ passed, other }) {
                 <Cell key={r.name} fill={chartColors[i]} />
               ))}
             </Pie>
-            <Tooltip content={<ChartTip format={(n) => `${n} saves`} />} />
+            <Tooltip content={<ChartTip format={(n) => `${n} attempt${n === 1 ? "" : "s"}`} />} />
           </PieChart>
         </ResponsiveContainer>
         <strong>
-          {passed + other
-            ? `${Math.round((passed / (passed + other)) * 100)}%`
+          {passed + failed
+            ? `${Math.round((passed / (passed + failed)) * 100)}%`
             : "—"}
         </strong>
       </div>
@@ -293,104 +289,18 @@ export function OutcomeChart({ passed, other }) {
     </div>
   );
 }
-export function SkillRadar({ rows }) {
-  const selected = rows.slice(0, 6),
-    max = Math.max(100, ...selected.map((r) => r.amount));
-  if (selected.length < 3)
-    return (
-      <p className="status-empty">
-        Three recorded skills are needed for the radar.
-      </p>
-    );
-  return (
-    <div
-      className="chart-frame radar-chart"
-      role="img"
-      aria-label="Skill scores radar; hover an axis to inspect"
-    >
-      <ResponsiveContainer width="100%" height="100%">
-        <RadarChart data={selected} outerRadius="66%">
-          <PolarGrid stroke="#c0d6ff30" />
-          <PolarAngleAxis
-            dataKey="name"
-            tick={{ fill: "#d8dce6", fontSize: 11 }}
-          />
-          <PolarRadiusAxis domain={[0, max]} tick={false} axisLine={false} />
-          <Radar
-            name="Recorded score"
-            dataKey="amount"
-            stroke="#596ac1"
-            fill="#596ac1"
-            fillOpacity={0.13}
-            dot={{ r: 3, fill: "#d6e4ec" }}
-            isAnimationActive={false}
-          />
-          <Tooltip content={<ChartTip format={(n) => `${n} points`} />} />
-        </RadarChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
-export function SkillRanking({ rows }) {
-  if (!rows.length)
-    return <p className="status-empty">No skill scores in this category.</p>;
-  return (
-    <div
-      className="skill-ranking"
-      style={{ height: Math.max(210, rows.length * 38) }}
-      role="img"
-      aria-label="Interactive recorded skill score ranking"
-    >
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={rows}
-          layout="vertical"
-          margin={{ top: 8, right: 35, left: 0, bottom: 8 }}
-          accessibilityLayer
-        >
-          <CartesianGrid stroke="#e6edff12" horizontal={false} />
-          <XAxis
-            type="number"
-            {...axis}
-            domain={[0, Math.max(100, ...rows.map((r) => r.amount))]}
-          />
-          <YAxis type="category" dataKey="name" {...axis} width={94} />
-          <Tooltip
-            content={<ChartTip format={(n) => `${n} points`} />}
-            cursor={{ fill: "#badcff0d" }}
-          />
-          <Bar
-            dataKey="amount"
-            name="Highest score"
-            barSize={5}
-            fill="#654ea3"
-            isAnimationActive={false}
-            label={{ position: "right", fill: "#e0e2e7", fontSize: 11 }}
-          />
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
 export function SkillHistory({ transactions, skills }) {
-  const top = skills.slice(0, 3),
-    history = transactions
-      .filter((r) => top.some((s) => s.type === r.type))
-      .sort(byTime);
-  const map = new Map(),
-    totals = {};
-  history.forEach((r) => {
-    totals[r.type] = Math.max(totals[r.type] || 0, r.amount);
-    map.set(r.createdAt.slice(0, 10), {
-      date: r.createdAt.slice(0, 10),
-      ...totals,
-    });
-  });
-  const rows = [...map.values()];
+  const top = skills.slice(0, 3), rows = skillHistory(transactions, top);
   if (!rows.length)
     return (
       <p className="status-empty">No dated skill transactions available.</p>
     );
+  if(rows.length===1) return <div className="skill-single-record" role="figure" aria-label="One recorded skill date">
+    <div className="skill-snapshot-marker"/>
+    <div><span className="status-overline">Recorded on {date(rows[0].date)}</span><h3>{top[0]?.name}</h3>
+      <p>All available updates fall on this date. There are no earlier dated changes to plot.</p></div>
+    <strong>{rows[0][top[0]?.type]}<small>points</small></strong>
+  </div>;
   return (
     <div
       className="chart-frame"
@@ -404,8 +314,8 @@ export function SkillHistory({ transactions, skills }) {
           accessibilityLayer
         >
           <CartesianGrid stroke="#e6edff16" vertical={false} />
-          <XAxis {...axis} dataKey="date" minTickGap={55} />
-          <YAxis {...axis} width={30} />
+          <XAxis {...axis} dataKey="date" minTickGap={55} padding={{left:32,right:32}} interval="preserveStartEnd"/>
+          <YAxis {...axis} width={35} domain={[0,Math.max(100,...top.map(s=>s.amount))]}/>
           <Tooltip content={<ChartTip format={(n) => `${n} points`} />} />
           <Legend iconType="plainline" wrapperStyle={{ fontSize: 12 }} />
           {top.map((s, i) => (
@@ -416,7 +326,8 @@ export function SkillHistory({ transactions, skills }) {
               stroke={chartColors[i]}
               strokeWidth={2.5}
               type="stepAfter"
-              dot={false}
+              dot={{r:3,fill:"#b8cfff",stroke:"#17203c"}}
+              activeDot={{r:6,fill:"#d5e8ff"}}
               connectNulls
               isAnimationActive={false}
             />

@@ -19,6 +19,17 @@ const record = (id, path, grade, type = "exercise") => ({
   object: { id: 17, name: "same exercise", type },
 });
 describe("memory card records", () => {
+  it("merges reissued main-project names and retains their unique history",()=>{
+    const old=record(1,"/bahrain/bh-module/graphql-old",0,"project");
+    old.object={id:17,name:" GraphQL ",type:"project"};
+    const current={...record(2,"/bahrain/bh-module/graphql",1.2,"project"),objectId:18,object:{id:18,name:"graphql",type:"project"}};
+    const cards=memoryCards({results:[old,current,old],allProgress:[],allTransactions:[],events:[]});
+    expect(cards[0].items).toHaveLength(1);
+    expect(cards[0].passed).toBe(1);
+    expect(cards[0].items[0].history).toHaveLength(2);
+    expect(cards[0].items[0].passed).toBe(true);
+    expect(cards[0].items[0].path).toBe(current.path);
+  });
   it("assigns console slots Main, Go, JavaScript, Rust independent of enrollment order", () => {
     const cards=memoryCards({events:[root,"/bahrain/bh-module/piscine-js","/bahrain/bh-piscine"]
       .map((path,i)=>({id:4-i,event:{path}}))});

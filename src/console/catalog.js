@@ -105,16 +105,53 @@ export function learningItems(data) {
       ),
     );
 }
+
+// Main-curriculum projects can be reissued with another object ID or path.
+// Merge their display names here, after separating piscine/quest contexts.
+export function uniqueModuleProjects(items = []) {
+  const projects = new Map();
+  const uniqueRecords = rows => [...new Map(rows.map(row => [
+    row.id != null ? `id:${row.id}` : JSON.stringify([row.path, row.createdAt, row.grade, row.type]), row,
+  ])).values()];
+  items.forEach((item, index) => {
+    const name = (item.name || titleOf(item)).normalize("NFKC").trim().replace(/\s+/g, " ").toLowerCase();
+    const key = name === "untitled" ? item.key || item.path || item.objectId || `unknown:${index}` : name;
+    if (!projects.has(key)) projects.set(key, []);
+    projects.get(key).push(item);
+  });
+  return [...projects.values()].map(versions => {
+    const newest = [...versions].sort((a, b) =>
+      (b.updatedAt || b.createdAt || "").localeCompare(a.updatedAt || a.createdAt || ""),
+    )[0];
+    const history = uniqueRecords(versions.flatMap(item => item.history || []));
+    const progress = uniqueRecords(versions.flatMap(item => item.progress || []));
+    const graded = [...history, ...progress].filter(row => row.grade != null).sort(byTime);
+    // Flat records are supported too; normal catalog entries carry both arrays.
+    if (!graded.length) graded.push(...versions.filter(item => item.grade != null).sort(byTime));
+    const passed = graded.some(row => row.grade >= 1);
+    return {
+      ...newest,
+      history,
+      progress,
+      grade: graded.at(-1)?.grade ?? null,
+      passed,
+      status: passed ? "Passed" : graded.length ? "Not passed" : "Ungraded",
+      attempts: history.length,
+      xp: versions.reduce((total, item) => total + (Number(item.xp) || 0), 0),
+      teams: [...new Map(versions.flatMap(item => item.teams || []).map(team => [team.id, team])).values()],
+    };
+  });
+}
 export function memoryCards(data) {
   const items = learningItems(data);
-  const main = items.filter(
+  const main = uniqueModuleProjects(items.filter(
     (r) =>
       r.path?.startsWith(MODULE_ROOT + "/") &&
       !r.root &&
       (r.object?.type === "project" ||
         r.history.some((h) => h.type === "user_audit") ||
         !r.object?.type),
-  );
+  ));
   const roots = new Set(
     [
       ...items.map((r) => r.root),
@@ -257,6 +294,14 @@ export const skillName = (key) =>
     rust: "Rust",
     graphql: "GraphQL",
     tcp: "Networking",
+    game: "Game development",
+    ai: "Artificial intelligence",
+    "sys-admin": "System administration",
+    stats: "Statistics",
+    cloud: "Cloud",
+    cybersecurity: "Cybersecurity",
+    blockchain: "Blockchain",
+    mobile: "Mobile development",
   })[key] || key;
 export function skillRows(data) {
   return (data.skills || [])

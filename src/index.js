@@ -10,6 +10,7 @@ import "./console/status.css";
 import "./console/memory-browser.css";
 import "./console/menu-finish.css";
 import "./console/about.css";
+import "./console/insights.css";
 import { preloadStaticAssets } from "./lib/preloadAssets.js";
 
 preloadStaticAssets();

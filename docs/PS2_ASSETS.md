@@ -14,7 +14,9 @@ The live experience uses PlayCanvas, locally hosted textures and sounds, and aut
 - `fonts/PsOld-vmPMD.ttf`, `fonts/zrnic rg.ttf`, and `public/ps2_assets/ps2_logo.png`: existing project fonts and branding.
 - `fonts/Helvetica-Medium.ttf`: the exact Helvetica Medium face served by [imsaud.me](https://www.imsaud.me/Helvetica%20Medium.ttf), fetched at the user's request. Its metadata identifies a medium-weight face (500). Primary menu labels use synthesized bold (700); descriptions retain the medium face. This asset is not represented as an open-source font.
 
-The memory-card and save meshes use authored CSS 3D faces and SVG artwork. The previous PS2UI hardware prototypes, Glace experiment, Three.js renderer, unused original shader copies and duplicate raw menu sounds have been removed from production sources.
+The memory cards use an authored six-face projected mesh, rendered into one high-resolution canvas per card to prevent CSS 3D compositing flashes. Save icons retain authored CSS 3D faces and SVG artwork. The previous PS2UI hardware prototypes, Glace experiment, Three.js renderer, unused original shader copies and duplicate raw menu sounds have been removed from production sources.
+
+Rear memory-card marks are hosted locally in `public/experience/brands/`: the [official Reboot01 logo](https://reboot01.com/wp-content/uploads/2022/09/Reboot-Logo.png), the [official white Go wordmark](https://go.dev/blog/go-brand/Go-Logo/SVG/Go-Logo_White.svg), and JavaScript/Rust silhouettes from [Simple Icons](https://github.com/simple-icons/simple-icons). White artwork is produced at texture creation time; no external request is needed at runtime. See [the local source notes](../public/experience/brands/SOURCES.md).
 
 ## Visual references and local archives
 

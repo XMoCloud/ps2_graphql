@@ -7,6 +7,7 @@ import { SAMPLE } from "./data";
 
 vi.mock("../experience/Experience", () => ({ useExperience: () => ({ motion: true, setWorldObscured: vi.fn(), setMemoryAudioSuspended: vi.fn() }) }));
 vi.mock("../lib/sound", () => ({ playOpenSound: vi.fn(), playBackSound: vi.fn(), playHoverSound: vi.fn() }));
+vi.mock("./MemoryCardModel",()=>({default:()=> <span aria-hidden="true"/>}));
 
 beforeEach(() => {
   vi.useFakeTimers();

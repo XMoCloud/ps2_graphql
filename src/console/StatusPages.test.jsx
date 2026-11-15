@@ -7,6 +7,7 @@ vi.mock("./Charts", async (original) => ({
   ...await original(),
   ExchangeChart: () => null,
 }));
+vi.mock("./InsightCharts", () => ({ AuditBalanceChart:()=>null, AuditOutcomeChart:()=>null }));
 afterEach(cleanup);
 
 describe("Audit balance target", () => {

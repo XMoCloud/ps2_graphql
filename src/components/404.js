@@ -9,12 +9,9 @@ export default function NotFound() {
   }, []);
   return (
     <main className="not-found">
-      <p className="eyebrow">SYSTEM / DISC ERROR</p>
       <h1>404</h1>
-      <h2>This world could not be found.</h2>
-      <p>The page may have moved. Your journey is still here.</p>
       <Link className="outline-button" to="/dashboard">
-        × Return to overview
+        Return to overview
       </Link>
     </main>
   );

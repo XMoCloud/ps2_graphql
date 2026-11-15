@@ -4,29 +4,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { memoryCards, questGroups } from "./catalog";
 import { xp } from "./data";
 import { SaveIcon, SaveInformation } from "./MemorySave";
+import MemoryCardModel from "./MemoryCardModel";
 import { MEMORY_FADE_MS, SAVE_STAGGER_MS, SAVE_REVEAL_MS, DETAIL_ENTER_MS, SAVES_PER_PAGE, saveAppearance } from "./memoryMotion";
 import { useExperience } from "../experience/Experience";
 import { playOpenSound, playBackSound, playHoverSound } from "../lib/sound";
-
-export function MemoryCardModel({ card, number }) {
-  return <span className="card-model-stage" aria-hidden="true">
-    <span className="card-model-float"><span className="card-model">
-      <span className="card-face card-front">
-        <span className="card-grip" />
-        <span className="card-emboss">MEMORY CARD</span>
-        <span className="card-capacity">128<span>MB</span></span>
-        <span className="card-technology">MagicGate</span>
-        <span className="card-label"><b>{card.short}</b><small>REBOOT01 / {String(number + 1).padStart(2, "0")}</small></span>
-        <span className="card-indents"><i /><i /></span>
-      </span>
-      <span className="card-face card-back" />
-      <span className="card-face card-left" />
-      <span className="card-face card-right" />
-      <span className="card-face card-top" />
-      <span className="card-face card-bottom" />
-    </span></span>
-  </span>;
-}
 
 export default function MemoryBrowser({ data }) {
   const cards = useMemo(() => memoryCards(data), [data]);

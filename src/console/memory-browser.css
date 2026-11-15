@@ -1,29 +1,27 @@
 /* Recorded reference: neutral charcoal browser, 1.7s black fades, 250ms saves.
    Only the selected model animates; the background renderer sleeps in the dialog. */
-.memory-library-intro p { font: 500 20px/1.4 var(--ps2-menu-face); color: var(--menu-gray); }
+.memory-library-intro p { font:700 clamp(23px,1.65vw,29px)/1.4 var(--ps2-menu-face); color:var(--menu-hover); text-shadow:var(--menu-outline); }
 .card-choice-heading > strong { font: 700 22px/1.2 var(--ps2-menu-face); color: var(--menu-gray); }
 .card-choice-heading > small { font-size: 11px; }
 .card-choice-caption { font: 500 15px/1.6 var(--ps2-menu-face); color: var(--menu-gray); }
 .card-choice-caption small { font-size: 13px; color: var(--menu-gray); }
-.card-model-stage { filter: brightness(.66); transition: filter .3s; }
-.card-model-float { position: absolute; inset: 0; display: block; transform-style: preserve-3d; }
-.card-model { transition: transform .6s ease; }
-.memory-card-choice:is(:hover, :focus-visible) .card-model-stage { filter: brightness(1); }
-.memory-card-choice:is(:hover, :focus-visible) .card-model-float { animation: memory-card-float 4.8s ease-in-out infinite; }
-.memory-card-choice:is(:hover, :focus-visible) .card-model { animation: memory-card-sway 7s ease-in-out infinite; }
+.card-model-stage { filter:none; perspective:none; }
+.card-model-stage::before, .card-model-stage::after { content:none; }
+.card-mesh { position:absolute; display:block; left:-21px; top:0; width:200px; height:250px; pointer-events:none; }
+.status-console .memory-card-choice:is(:hover,:focus,:focus-visible) { outline:0; outline-offset:0; box-shadow:none; border:0; }
+.card-model-shadow {
+  position:absolute; display:block; inset:0 -24px -12px; pointer-events:none;
+  background:radial-gradient(ellipse at 50% 48%,#0009 10%,#0005 43%,transparent 73%);
+}
+.card-selection-glow {
+  position:absolute; display:block; left:50%; bottom:-42px; width:138px; height:100px;
+  transform:translateX(-50%); pointer-events:none;
+  background:radial-gradient(ellipse,#ffffffe6 0%,#ffffff9c 10%,#ffffff35 32%,#d9e7ff15 45%,transparent 68%);
+  opacity:0; transition:opacity .2s;
+}
+.memory-card-choice:is(:hover,:focus-visible) .card-selection-glow { opacity:1; animation:memory-save-glow 2.5s ease-in-out infinite; }
 .memory-card-choice:is(:hover, :focus-visible) .card-choice-heading strong { color: #e0ddec; }
 .memory-card-choice:focus-visible { outline: none; }
-.card-label { background: linear-gradient(120deg, #30343a, #24272c); border-top: 1px solid var(--card-accent); color: #bdc2ca; box-shadow: inset 0 1px #ffffff12; }
-.card-label b { font-weight: 400; }
-.card-label small { color: #91969d; }
-@keyframes memory-card-float {
-  0%, 100% { transform: translateY(-5px); }
-  50% { transform: translateY(-19px); }
-}
-@keyframes memory-card-sway {
-  0%, 100% { transform: rotateX(-7deg) rotateY(-23deg) rotateZ(-2deg); }
-  50% { transform: rotateX(4deg) rotateY(23deg) rotateZ(2deg); }
-}
 
 .memory-browser-dialog {
   position: fixed; inset: 0; margin: 0; padding: 0;
@@ -205,7 +203,7 @@
   .save-team li { font-size: 17px; }
 }
 @media (max-width: 680px) {
-  .memory-library-intro p { font-size: 18px; }
+  .memory-library-intro p { font-size: 22px; }
   .card-choice-heading > strong { font-size: 18px; }
   .card-choice-heading > small { font-size: 9px; }
   .card-choice-caption { font-size: 13px; }
@@ -237,10 +235,9 @@
   .save-records { font-size: 17px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .memory-card-choice:is(:hover, :focus-visible) .card-model-float,
-  .memory-card-choice:is(:hover, :focus-visible) .card-model,
+  .card-selection-glow,
   .save-object.large .save-object-model,
   .save-browser-item.is-selected .save-icon-stage::after { animation: none; }
   .memory-fader, .save-icon-reveal, .save-browser-item > strong, .save-detail-layer, .save-detail-model { animation-duration: .01s; animation-delay: 0s; }
-  .memory-browser-surface, .card-model, .save-icon-reveal { transition: none; }
+  .memory-browser-surface, .save-icon-reveal { transition: none; }
 }

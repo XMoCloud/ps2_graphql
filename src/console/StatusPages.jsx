@@ -2,11 +2,12 @@ import React, { useMemo, useState } from "react";
 import { xp, date } from "./data";
 import { Readout } from "./DashboardPage";
 import { auditState, skillRows, technicalSkills } from "./catalog";
+import { skillGains } from "./analytics";
+import { AuditBalanceChart, AuditOutcomeChart } from "./InsightCharts";
+import SkillsConstellation from "./SkillsConstellation";
 import {
   ChartPanel,
   ExchangeChart,
-  SkillRadar,
-  SkillRanking,
   SkillHistory,
 } from "./Charts";
 export function AuditPage({ data }) {
@@ -21,10 +22,6 @@ export function AuditPage({ data }) {
   ).length;
   const ratio = data.down ? data.up / data.down : null,
     required = Math.max(0, (data.down || 0) * target - (data.up || 0));
-  const completed = [
-    ...given.map((r) => ({ ...r, series: "given", amount: 1 })),
-    ...received.map((r) => ({ ...r, series: "received", amount: 1 })),
-  ];
   const records = useMemo(
     () =>
       (direction === "given" ? data.auditsGiven : data.auditsReceived)
@@ -103,11 +100,14 @@ export function AuditPage({ data }) {
         </div>
       </ChartPanel>
       <ChartPanel
-        title="Reviews over time"
-        caption="Graded audits, grouped by assignment month"
-        className="span-full"
+        title="Contribution balance"
+        caption="Given minus received credit · zero means balanced"
+        className="span-wide"
       >
-        <ExchangeChart rows={completed} counts />
+        <AuditBalanceChart transactions={data.audits} up={data.up} down={data.down}/>
+      </ChartPanel>
+      <ChartPanel title="Review outcomes" caption="Graded results and outstanding assignments" className="span-narrow">
+        <AuditOutcomeChart given={data.auditsGiven} received={data.auditsReceived}/>
       </ChartPanel>
       <ChartPanel
         title="Review history"
@@ -191,11 +191,15 @@ export function AuditPage({ data }) {
   );
 }
 export function SkillsPage({ data }) {
-  const [category, setCategory] = useState("technology");
+  const [category, setCategory] = useState("all"), [historyType,setHistoryType] = useState("");
   const all = skillRows(data),
     rows = all.filter(
-      (r) => technicalSkills.includes(r.key) === (category === "technical"),
+      (r) => category==="all" || technicalSkills.includes(r.key) === (category === "technical"),
     );
+  const allGains = skillGains(data.allTransactions, all);
+  const activeSkill = rows.find(row=>row.type===historyType) || rows[0];
+  const latestUpdate = data.allTransactions.filter(r=>all.some(s=>s.type===r.type) && Date.parse(r.createdAt)<=Date.now())
+    .map(r=>r.createdAt).sort().at(-1);
   return (
     <div className="status-grid">
       <div className="status-readouts span-full">
@@ -205,14 +209,14 @@ export function SkillsPage({ data }) {
           detail="Unique platform skill types"
         />
         <Readout
-          label="Technologies"
-          value={all.filter((r) => !technicalSkills.includes(r.key)).length}
-          detail="Languages & tools"
+          label="Improved recently"
+          value={allGains.length}
+          detail="New personal bests · last 90 days"
         />
         <Readout
-          label="Technical skills"
-          value={all.filter((r) => technicalSkills.includes(r.key)).length}
-          detail="Programming disciplines"
+          label="Latest skill update"
+          value={date(latestUpdate)}
+          detail="Most recent dated platform record"
         />
         <Readout
           label="Strongest signal"
@@ -221,40 +225,32 @@ export function SkillsPage({ data }) {
         />
       </div>
       <div className="span-full console-options skill-categories">
-        {["technology", "technical"].map((c) => (
+        {["all", "technology", "technical"].map((c) => (
           <button
             key={c}
             aria-pressed={category === c}
-            onClick={() => setCategory(c)}
+            onClick={() => {setCategory(c);setHistoryType("");}}
           >
-            {c === "technology" ? "Technologies" : "Technical skills"}
+            {c === "all" ? "All skills" : c === "technology" ? "Technologies" : "Technical skills"}
           </button>
         ))}
       </div>
       <ChartPanel
-        title={category === "technology" ? "Your toolkit" : "How you build"}
-        caption="Highest recorded score per skill"
-        className="span-wide"
-      >
-        <SkillRanking rows={rows} />
-      </ChartPanel>
-      <ChartPanel
         title="Skill constellation"
-        caption="Six strongest signals in this category"
-        className="span-narrow"
+        caption={`${rows.length} skills in view · every recorded score is shown`}
+        className="span-full skill-constellation-panel"
       >
-        <SkillRadar rows={rows} />
-        <p className="status-footnote">
-          Platform scores record curriculum progress. They do not measure
-          professional proficiency.
-        </p>
+        <SkillsConstellation rows={rows} transactions={data.allTransactions} selectedType={activeSkill?.type} onSelect={setHistoryType}/>
       </ChartPanel>
       <ChartPanel
-        title="Skill progression"
-        caption="Personal best scores · three strongest skills"
+        title="Skill journey"
+        caption="Choose a skill to see when its personal best improved"
         className="span-full"
+        controls={rows.length > 0 && <label className="skill-history-choice">Skill <select aria-label="Skill" value={activeSkill?.type || ""} onChange={event=>setHistoryType(event.target.value)}>
+          {rows.map(row=><option key={row.type} value={row.type}>{row.name}</option>)}
+        </select></label>}
       >
-        <SkillHistory transactions={data.allTransactions} skills={rows} />
+        <SkillHistory transactions={data.allTransactions} skills={activeSkill ? [activeSkill] : []} />
       </ChartPanel>
     </div>
   );

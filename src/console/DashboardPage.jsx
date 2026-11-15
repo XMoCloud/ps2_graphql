@@ -2,13 +2,13 @@ import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { xp, date } from "./data";
 import { memoryCards, skillRows, titleOf } from "./catalog";
+import { completedPiscines, projectOutcomes } from "./analytics";
+import { CommunityChart, ProjectXPChart } from "./InsightCharts";
 import {
   ChartPanel,
   XPChart,
   PeriodSwitch,
-  ExchangeChart,
   OutcomeChart,
-  SkillRadar,
 } from "./Charts";
 export function Readout({ label, value, detail }) {
   return (
@@ -71,6 +71,7 @@ export default function DashboardPage({ data, base = "" }) {
   const cards = useMemo(() => memoryCards(data), [data]),
     projects = cards[0],
     skills = skillRows(data);
+  const outcomes = projectOutcomes(projects.items);
   const given = data.auditsGiven.filter((r) => r.grade != null),
     received = data.auditsReceived.filter((r) => r.grade != null);
   const newest = [...projects.items]
@@ -122,13 +123,13 @@ export default function DashboardPage({ data, base = "" }) {
           detail={`${xp(data.allXP)} across all events`}
         />
         <Readout
-          label="Projects passed"
-          value={`${projects.passed} / ${projects.items.length}`}
-          detail="Unique projects · any recorded pass"
+          label="Skills Mastered"
+          value={skills.length}
+          detail="Distinct skills with platform records"
         />
         <Readout
-          label="Piscines"
-          value={String(cards.length - 1).padStart(2, "0")}
+          label="Piscines Completed"
+          value={String(completedPiscines(data)).padStart(2, "0")}
           detail={`${cards.slice(1).reduce((n, c) => n + c.passed, 0)} exercises passed`}
         />
         <Readout
@@ -147,33 +148,32 @@ export default function DashboardPage({ data, base = "" }) {
       </ChartPanel>
       <ChartPanel
         title="Project results"
-        caption="Unique module projects"
+        caption="Graded module attempts · including past failures"
         className="span-narrow"
       >
         <OutcomeChart
-          passed={projects.passed}
-          other={projects.items.length - projects.passed}
+          passed={outcomes.passed}
+          failed={outcomes.failed}
         />
+        <p className="status-footnote">{outcomes.projects} unique project{outcomes.projects === 1 ? "" : "s"}.</p>
+        <p className="status-footnote">{outcomes.ungraded} ungraded project{outcomes.ungraded === 1 ? "" : "s"} excluded from this chart.</p>
         <Link className="ps2-text-link" to={`${base}/projects`}>
           Open memory cards <span>→</span>
         </Link>
       </ChartPanel>
       <ChartPanel
-        title="Audit exchange"
-        caption="Credits by month · last twelve months"
-        className="span-wide"
+        title="User Distribution"
+        caption="Your place in the main curriculum"
+        className="span-wide community-panel"
       >
-        <ExchangeChart rows={data.audits} />
+        <CommunityChart users={data.communityUsers} labels={data.communityCohorts} userId={data.user?.id} events={data.events} level={data.level} ratio={ratio}/>
       </ChartPanel>
       <ChartPanel
-        title="Skill signal"
-        caption="Six highest recorded scores"
+        title="Projects XP"
+        caption="How each award contributes to your module XP"
         className="span-narrow"
       >
-        <SkillRadar rows={skills} />
-        <Link className="ps2-text-link" to={`${base}/skills`}>
-          View all {skills.length} skills <span>→</span>
-        </Link>
+        <ProjectXPChart transactions={data.transactions}/>
       </ChartPanel>
       <ChartPanel
         title="Piscine records"

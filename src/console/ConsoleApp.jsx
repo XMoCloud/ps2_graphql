@@ -12,7 +12,6 @@ import { useAccount } from "./data";
 import DashboardPage from "./DashboardPage";
 import MemoryBrowser from "./MemoryBrowser";
 import { AuditPage, SkillsPage } from "./StatusPages";
-import { MenuPrompts } from "./ConsoleKeys";
 import AboutPage, { AboutEntry } from "./AboutPage";
 
 const sections = [
@@ -183,7 +182,6 @@ export default function ConsoleApp() {
           </>
         )}
       </main>
-      <MenuPrompts />
       <AboutEntry to={`${base}/about`} returnTo={location.pathname} />
     </div>
   );
