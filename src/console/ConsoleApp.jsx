@@ -6,7 +6,6 @@ import {
   playClickSound,
   playHoverSound,
   playLogoutSound,
-  stopDashboardLoop,
 } from "../lib/sound";
 import { useAccount } from "./data";
 import DashboardPage from "./DashboardPage";
@@ -78,7 +77,6 @@ export default function ConsoleApp() {
     if (e.navigation || leaving.current) return;
     leaving.current = true;
     playLogoutSound();
-    stopDashboardLoop();
     e.navigateWorld(() => {
       if (!preview) removeToken();
       navigate("/");

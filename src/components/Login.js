@@ -7,7 +7,6 @@ import {
   prepareDashboardLoop,
   unlockAudio,
   playHoverSound,
-  stopErrorSound,
   stopDashboardLoop,
 } from "../lib/sound";
 import { useExperience } from "../experience/Experience";
@@ -26,7 +25,6 @@ export default function Login() {
     if (isAuthenticated()) navigate("/dashboard", { replace: true });
     return () => {
       e.setSceneError(false);
-      stopErrorSound();
     };
   }, [navigate]);
   const submit = async (event) => {
@@ -41,7 +39,6 @@ export default function Login() {
       const token = await signIn(identifier, password);
       setToken(token);
       e.setSceneError(false);
-      stopErrorSound();
       e.beginAccountAmbience();
       playLoginSound();
       e.navigateWorld(() => navigate("/dashboard"), "menu");

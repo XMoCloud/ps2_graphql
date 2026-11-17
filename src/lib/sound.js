@@ -35,12 +35,22 @@ export function unlockAudio() {
     audioContext.resume().catch(() => {});
     Object.keys(sources).forEach(cueBuffer);
   } catch {}
+  // Retry wanted streaming loops after a gesture (for a refreshed login page
+  // where the browser initially disallowed automatic playback).
+  if (enabled && !document.hidden) tracks.forEach(({ audio }, name) => {
+    if (audio.loop && loopWanted(name)) audio.play().catch(() => {});
+  });
 }
 let enabled = true,
   master = 0.45;
 let wavesLevel = 0, wavesWanted = false, wavesFadeTimer;
+const sceneLoops = new Map([
+  ["login_ambient", { gain: .55, level: 0, wanted: false, timer: undefined }],
+  ["death_sound", { gain: .8, level: 0, wanted: false, timer: undefined }],
+]);
 const paused = new Set();
-const trackLevel = name => name === "waves_loop" ? wavesLevel : 1;
+const trackLevel = name => name === "waves_loop" ? wavesLevel : sceneLoops.get(name)?.level ?? 1;
+const loopWanted = name => name === "waves_loop" ? wavesWanted : sceneLoops.get(name)?.wanted ?? true;
 function mediaTrack(name, gain, loop = false) {
   if (!tracks.has(name)) {
     const audio = new Audio(sources[name] || `/ps2_assets/ps2_${name}.mp3`);
@@ -81,6 +91,7 @@ function play(name, gain, loop = false) {
   item.audio.muted = !enabled;
   item.audio.volume = master * item.gain * trackLevel(name);
   if (!enabled) return item.audio;
+  if (loop && document.hidden) { paused.add(item.audio); return item.audio; }
   if (!loop) item.audio.currentTime = 0;
   item.audio.play().catch(() => {});
   return item.audio;
@@ -95,8 +106,67 @@ export function configureSound(on, volume) {
   voices.forEach(({ volume, gain }) => {
     volume.gain.value = on ? master * gain : 0;
   });
-  if (on && wavesWanted && !document.hidden) tracks.get("waves_loop")?.audio.play().catch(() => {});
+  if (on && !document.hidden) tracks.forEach(({ audio }, name) => {
+    if (audio.loop && loopWanted(name)) audio.play().catch(() => {});
+  });
 }
+
+// Scene loops keep their transport separate from their mix level. Fading login
+// ambience to silence pauses it; returning from an error or logout resumes it.
+function fadeSceneLoop(name, audible, duration, rewind = false) {
+  const state = sceneLoops.get(name);
+  if (state.wanted === audible && state.timer) return;
+  clearTimeout(state.timer);
+  state.timer = undefined;
+  state.wanted = audible;
+  if (!audible && !tracks.has(name)) { state.level = 0; return; }
+  const audio = audible ? play(name, state.gain, true) : tracks.get(name).audio;
+  if (!document.hidden) paused.delete(audio);
+  const from = state.level, target = audible ? 1 : 0, started = Date.now();
+  const silence = () => {
+    audio.pause();
+    paused.delete(audio);
+    if (rewind) audio.currentTime = 0;
+  };
+  const step = () => {
+    const t = duration <= 0 ? 1 : Math.min(1, (Date.now() - started) / duration);
+    const ease = t * t * (3 - 2 * t);
+    state.level = from + (target - from) * ease;
+    audio.volume = master * state.gain * state.level;
+    if (t < 1) state.timer = setTimeout(step, 32);
+    else {
+      state.timer = undefined;
+      if (!audible) silence();
+    }
+  };
+  if (Math.abs(target - from) < .0001) {
+    if (!audible) silence();
+  } else step();
+  return audio;
+}
+function stopSceneLoop(name, rewind = false) {
+  const state = sceneLoops.get(name);
+  clearTimeout(state.timer);
+  state.timer = undefined;
+  state.wanted = false;
+  state.level = 0;
+  const audio = tracks.get(name)?.audio;
+  if (!audio) return;
+  paused.delete(audio);
+  audio.pause();
+  audio.volume = 0;
+  if (rewind) audio.currentTime = 0;
+}
+export function prepareLoginLoop() {
+  if (tracks.has("login_ambient")) return;
+  const { audio } = mediaTrack("login_ambient", sceneLoops.get("login_ambient").gain, true);
+  audio.volume = 0;
+  audio.preload = "auto";
+  audio.load();
+}
+export const fadeLoginLoop = (audible, duration = 1000) => fadeSceneLoop("login_ambient", audible, duration);
+export const stopLoginLoop = () => stopSceneLoop("login_ambient");
+export const fadeErrorSound = (audible, duration = 1000) => fadeSceneLoop("death_sound", audible, duration, true);
 // The ambience has a transport independent of its volume. Pausing for a memory
 // card preserves currentTime; only ending the account session rewinds it.
 export function fadeDashboardLoop(audible, duration = 1700) {
@@ -107,7 +177,7 @@ export function fadeDashboardLoop(audible, duration = 1700) {
   const target = audible ? 1 : 0;
   if (!audible && !tracks.has("waves_loop")) return;
   const audio = audible ? play("waves_loop", 0.55, true) : tracks.get("waves_loop").audio;
-  paused.delete(audio);
+  if (!document.hidden) paused.delete(audio);
   const from = wavesLevel, started = Date.now();
   const step = () => {
     const t = duration <= 0 ? 1 : Math.min(1, (Date.now() - started) / duration);
@@ -141,7 +211,7 @@ export function startDashboardLoop() {
   wavesWanted = true;
   wavesLevel = 1;
   const audio = play("waves_loop", .55, true);
-  paused.delete(audio);
+  if (!document.hidden) paused.delete(audio);
   return audio;
 }
 export const stopDashboardLoop = () => {
@@ -187,18 +257,19 @@ export const playLoginSound = () => {
   else play("menu_open", 0.7);
 };
 export const playBackSound = () => play("logout", 0.65);
-export const playLogoutSound = () => play("logout", 0.7);
-export const stopErrorSound = () => {
-  const item = tracks.get("death_sound");
-  if (item) {
-    paused.delete(item.audio);
-    item.audio.pause();
-    item.audio.currentTime = 0;
-  }
+export const playLogoutSound = () => {
+  unlockAudio();
+  return play("logout", 0.7);
 };
+export const stopErrorSound = () => stopSceneLoop("death_sound", true);
 export const playErrorSound = () => {
+  const state = sceneLoops.get("death_sound");
+  clearTimeout(state.timer);
+  state.timer = undefined;
+  state.level = 1;
+  state.wanted = true;
   const audio = play("death_sound", 0.8, true);
-  paused.delete(audio);
+  if (!document.hidden) paused.delete(audio);
   return audio;
 };
 function onVisibilityChange() {
@@ -207,7 +278,7 @@ function onVisibilityChange() {
       paused.add(audio);
       audio.pause();
     } else if (!document.hidden && paused.has(audio)) {
-      if (enabled && audio.loop && (name !== "waves_loop" || wavesWanted)) audio.play().catch(() => {});
+      if (enabled && audio.loop && loopWanted(name)) audio.play().catch(() => {});
       paused.delete(audio);
     }
   });
@@ -215,6 +286,7 @@ function onVisibilityChange() {
 document.addEventListener("visibilitychange", onVisibilityChange);
 if (import.meta.hot) import.meta.hot.dispose(() => {
   clearTimeout(wavesFadeTimer);
+  sceneLoops.forEach(state => clearTimeout(state.timer));
   document.removeEventListener("visibilitychange", onVisibilityChange);
   tracks.forEach(({ audio }) => audio.pause());
   voices.forEach(({ source }) => { try { source.stop(); } catch {} });

@@ -2,7 +2,7 @@ import React from "react";
 import { useExperience } from "../experience/Experience";
 import "./startup.css";
 export default function Startup() {
-  const { phase, renderer, startBoot, finishBoot, sound, setSound, setRenderer, worldReady: ready, worldError } =
+  const { phase, renderer, startBoot, finishBoot, setRenderer, worldReady: ready, worldError } =
     useExperience();
   const error = worldError ? "The 3D world could not initialize." : "";
   if (phase === "ready") return null;
@@ -20,9 +20,6 @@ export default function Startup() {
             <span>×</span> {ready ? "Start system" : "Preparing system…"}
           </button>
 
-          <button className="text-control" onClick={() => setSound(!sound)}>
-            Sound {sound ? "on" : "off"}
-          </button>
           {error && (
             <><p role="status" className="startup-error">{error}</p>
               <button className="text-control" onClick={() => { setRenderer("assets"); finishBoot(); }}>Use original background</button></>

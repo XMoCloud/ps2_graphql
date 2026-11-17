@@ -16,9 +16,92 @@ beforeEach(async () => {
 });
 afterEach(() => {
   sound.stopDashboardLoop();
+  sound.stopLoginLoop();
   sound.stopErrorSound();
   document.removeEventListener("visibilitychange", listener);
   vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.useRealTimers();
+});
+
+describe("login ambience transport",()=>{
+  it("preloads silently, loops after startup and retains playback position across scene fades",()=>{
+    sound.prepareLoginLoop();sound.prepareLoginLoop();
+    expect(audios).toHaveLength(1);
+    const audio=audios[0];
+    expect(audio.src).toBe("/ps2_assets/ps2_login_ambient.mp3");
+    expect(audio.loop).toBe(true);
+    expect(audio.play).not.toHaveBeenCalled();
+    expect(audio.load).toHaveBeenCalledTimes(1);
+    sound.fadeLoginLoop(true,1000);
+    expect(audio.playVolumes).toEqual([0]);
+    vi.advanceTimersByTime(1050);
+    expect(audio.volume).toBeCloseTo(.45*.55);
+    audio.currentTime=43.75;
+    sound.fadeLoginLoop(false,1000);
+    vi.advanceTimersByTime(500);
+    expect(audio.paused).toBe(false);
+    expect(audio.volume).toBeGreaterThan(0);
+    expect(audio.volume).toBeLessThan(.45*.55);
+    vi.advanceTimersByTime(550);
+    expect(audio.paused).toBe(true);
+    expect(audio.currentTime).toBe(43.75);
+    sound.prepareLoginLoop();sound.fadeLoginLoop(true,1000);
+    expect(audio.currentTime).toBe(43.75);
+    expect(audio.load).toHaveBeenCalledTimes(1);
+    expect(audio.playVolumes.at(-1)).toBe(0);
+    vi.advanceTimersByTime(1050);
+    expect(audio.volume).toBeCloseTo(.45*.55);
+    sound.stopLoginLoop();
+    expect(audio.currentTime).toBe(43.75);
+  });
+  it("reverses fades without a volume jump and applies the master volume",()=>{
+    const audio=sound.fadeLoginLoop(true,1000);
+    vi.advanceTimersByTime(500);
+    const level=audio.volume;
+    sound.fadeLoginLoop(false,1000);
+    expect(audio.volume).toBeCloseTo(level);
+    vi.advanceTimersByTime(200);
+    const quiet=audio.volume;
+    sound.fadeLoginLoop(true,1000);
+    expect(audio.volume).toBeCloseTo(quiet);
+    sound.configureSound(true,.9);
+    expect(audio.volume).toBeCloseTo(quiet*2);
+    vi.advanceTimersByTime(1050);
+    expect(audio.volume).toBeCloseTo(.9*.55);
+  });
+  it("crossfades to the death loop and resumes login at its paused position",()=>{
+    const login=sound.fadeLoginLoop(true,0);
+    login.currentTime=19;
+    sound.fadeLoginLoop(false,1000);
+    const death=sound.fadeErrorSound(true,1000);
+    expect(death.loop).toBe(true);
+    expect(death.volume).toBe(0);
+    vi.advanceTimersByTime(500);
+    expect(login.volume).toBeGreaterThan(0);
+    expect(death.volume).toBeGreaterThan(0);
+    expect(death.volume).toBeLessThan(.45*.8);
+    vi.advanceTimersByTime(550);
+    expect(login.paused).toBe(true);
+    expect(death.volume).toBeCloseTo(.45*.8);
+    sound.fadeErrorSound(false,1000);sound.fadeLoginLoop(true,1000);
+    expect(death.paused).toBe(false);
+    expect(login.currentTime).toBe(19);
+    vi.advanceTimersByTime(1050);
+    expect(death.paused).toBe(true);
+    expect(death.currentTime).toBe(0);
+    expect(login.volume).toBeCloseTo(.45*.55);
+  });
+  it("does not revive a suspended login loop after visibility or unmute changes",()=>{
+    const hidden=vi.spyOn(document,"hidden","get").mockReturnValue(false);
+    const audio=sound.fadeLoginLoop(true,0);
+    hidden.mockReturnValue(true);document.dispatchEvent(new Event("visibilitychange"));
+    sound.fadeLoginLoop(false,1000);vi.advanceTimersByTime(1050);
+    const plays=audio.play.mock.calls.length;
+    hidden.mockReturnValue(false);document.dispatchEvent(new Event("visibilitychange"));
+    sound.configureSound(true,.45);sound.unlockAudio();
+    expect(audio.play).toHaveBeenCalledTimes(plays);
+    expect(audio.paused).toBe(true);
+    expect(vi.getTimerCount()).toBe(0);
+  });
 });
 describe("waves ambience transport", () => {
   it("keeps the louder death ambience playing until the error is cleared", () => {
